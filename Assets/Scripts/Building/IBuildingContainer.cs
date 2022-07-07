@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IBuildingContainer
-{ 
-   void SetBuildPointsPositions();
-   public IEnumerable<BuildPoint> GetCorrectBuildPoints(Building building);
+{
+   public Vector3 WorldPosition { get; }
+      
+   public void SetBuildPointsPositions();
+   
+   public void AddChildBuilding(Building building, Direction3 direction);
 }

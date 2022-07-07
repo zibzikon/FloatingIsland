@@ -19,9 +19,11 @@ public abstract class Enemy : Entity, IDamagable, IUpdatable, IPausable
     
     public event Action Damaging;
     
-    protected abstract IDiethable  DieBehaviour { get; set; }
-    protected abstract IAtackable AtackBehaviour { get; set;}
-    protected abstract IMovable MovingBehaviour { get; set;}
+    protected IDiethable DieBehaviour { get; set; }
+    
+    protected IAtackable AtackBehaviour { get; set;}
+    
+    protected IMovable MovingBehaviour { get; set;}
     
     protected ITargetContainer TargetContainer { get; private set; }
     
@@ -53,7 +55,7 @@ public abstract class Enemy : Entity, IDamagable, IUpdatable, IPausable
     {
         if (IsPaused) return;
         
-        if (!AtackBehaviour.AtackingStarted)
+        if (!AtackBehaviour.AttackingStarted)
         {
             AtackBehaviour.Atack(GetTarget());
         }

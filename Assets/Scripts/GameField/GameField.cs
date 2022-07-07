@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Extentions;
 using UnityEngine;
 
@@ -8,11 +9,11 @@ public class GameField : MonoBehaviour
 {
 
     private Cell[,,] _cells;
-    public Vector3Int Size = new(10, 10, 10);
+    public readonly Vector3Int Size = new(6, 2, 6);
     [SerializeField] private GameFieldCellView _cellViewPrefab;
     [SerializeField] private Transform _debugObjectTransform;
 
-    private void Start()
+    private void Awake()
     {
         GenerateGameField();
     }
@@ -59,16 +60,18 @@ public class GameField : MonoBehaviour
     }
 
 
-    public bool TrySetBuilding(Building building, IBuildingContainer buildingContainer, BuildPoint buildPoint,
+    public bool TrySetBuilding(Building building,  BuildPoint buildPoint,
         bool firstSetting)
     {
-        buildingContainer.SetBuildPointsPositions();
+        buildPoint.BuildingContainer.SetBuildPointsPositions();
         if (TrySetCells(building, GetCellByPosition(buildPoint.OccupedCellPosition), firstSetting) == false)
             return false;
-        building.SetSupportBuilding(buildingContainer);
+        
+        building.SetSupportBuilding(buildPoint.BuildingContainer);
+        buildPoint.BuildingContainer.AddChildBuilding(building, buildPoint.Direction);
         building.SetPositionOnGameField(buildPoint.OccupedCellPosition);
-        building.transform.position = buildPoint.BuildPosition;
-        Debug.Log("buildingWasSeted");
+        building.transform.position = buildPoint.GetBuildPosition(buildPoint.BuildingContainer.WorldPosition);
+        Debug.Log("buildingWasSetted");
         return true;
     }
 
@@ -76,28 +79,51 @@ public class GameField : MonoBehaviour
     {
         if (TrySetCells(building, startCell, firstSetting) == false) return false;
         building.transform.position = startCell.WorldPosition;
+
         building.SetPositionOnGameField(startCell.Position);
-        Debug.Log("buildingWasSeted");
+        Debug.Log("buildingWasSetted");
         return true;
     }
 
     private bool TrySetCells(Building building, Cell startCell, bool firstSetting)
     {
         var cells = new List<Cell>();
-        var occupingCells = new List<OccupingCell>();
+        var occupyingCells = new List<OccupyingCell>();
 
         foreach (var occupyingCell in building.OccupyingCells)
         {
+            
+            foreach (var direction in DirectionExtentions.GetDirectionEnumerable())
+            {
+                if (occupyingCell.SettedNeighbours[direction]) continue;
+                
+                var cellNeighbour = startCell.Neighbours[direction];
+
+                var settedBuildings = cellNeighbour?.SettedBuildings;
+                if (settedBuildings == null|| !settedBuildings.Any()) continue;
+                foreach (var settedBuilding in settedBuildings)
+                {
+                    if (NeighbourIsSetted(building, settedBuilding) ||
+                        NeighbourIsSetted(settedBuilding, building)) continue;
+                    
+                    building.AddNeighbour(settedBuilding, direction);
+                    settedBuilding.AddNeighbour(building, direction.GetOppositeDirection());
+                    bool NeighbourIsSetted(Building startBuilding, Building possibleNeighbour)=>
+                     startBuilding.Neighbors[direction]?.Contains(possibleNeighbour) ?? false;
+                }
+            }
+            
             var occupyingCellPosition = startCell.Position + occupyingCell.Position;
             var cell = GetCellByPosition(occupyingCellPosition);
-            if (cell.IsFilled || cell.Ccapacity < building.Weight) return false;
+            if (cell.IsFilled || cell.Capacity < building.Weight || !Building.CanBeMergedWithBuildings(building, cell.SettedBuildings)) return false;
             cells.Add(cell);
-            occupingCells.Add(new OccupingCell(occupyingCellPosition));
+            occupyingCells.Add(OccupyingCell.Create(occupyingCellPosition, occupyingCell.SettedNeighbours));
         }
 
-        foreach (var setedCell in building.SetedCells)
+        
+        
+        foreach (var cell in building.SettedCells.Select(settedCell => GetCellByPosition(settedCell.Position)))
         {
-            var cell = GetCellByPosition(setedCell.Position);
             cell.RemoveBuilding(building);
         }
 
@@ -106,7 +132,7 @@ public class GameField : MonoBehaviour
             cell.SetBuilding(building);
         }
 
-        building.SetedCells = occupingCells;
+        building.SettedCells = occupyingCells;
         return true;
     }
 
@@ -115,13 +141,13 @@ public class GameField : MonoBehaviour
         return _cells[position.x, position.y, position.z];
     }
 
-    public Cell GetCellByWorldPosition(Vector3 position)
+    public static Vector3Int ConvertWorldToGameFieldPosition(Vector3 position)
     {
         var correctPosition =
             position.RoundToVector3Int() / GeneralGameSettings.GameFieldSettings.WorldPositionMultiplier;
-        return _cells[correctPosition.x, correctPosition.y, correctPosition.z];
+        return correctPosition;
     }
-
+    
     private void OnDisable()
     {
         for (var y = 0; y < Size.y; y++)

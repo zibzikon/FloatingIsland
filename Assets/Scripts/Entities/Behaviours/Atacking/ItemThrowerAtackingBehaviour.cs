@@ -3,7 +3,7 @@ namespace Units.Behaviours.Atacking
     public class ItemThrowerAtackingBehaviour : IAtackable
     {
         private IMovable _movingBehaviour;
-        public bool AtackingStarted { get; private set; }
+        public bool AttackingStarted { get; private set; }
 
         public ItemThrowerAtackingBehaviour(IMovable movingBehaviour)
         {
@@ -12,7 +12,7 @@ namespace Units.Behaviours.Atacking
         
         public void Atack(ITarget target)
         {
-            AtackingStarted = true;
+            AttackingStarted = true;
         }
     }
 }

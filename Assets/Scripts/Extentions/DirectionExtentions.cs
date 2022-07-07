@@ -7,6 +7,7 @@ public static class DirectionExtentions
     {
         return new[] { Direction3.Right, Direction3.Left, Direction3.Foward, Direction3.Back, Direction3.Up, Direction3.Down };
     }
+    
     public static Vector3 ToVector3( this Direction3 direction)
     {
         switch (direction)
@@ -22,7 +23,27 @@ public static class DirectionExtentions
             default: return Vector3.down;
         }
     }
-    
+
+    public static Direction3 GetOppositeDirection(this Direction3 direction3)
+    {
+        switch (direction3)
+        {
+            case Direction3.Back:
+                return Direction3.Foward;
+            case Direction3.Foward:
+                return Direction3.Back;
+            case Direction3.Up:
+                return Direction3.Down;
+            case Direction3.Down:
+                return Direction3.Up;
+            case Direction3.Right:
+                return Direction3.Left;
+            case Direction3.Left:
+                return Direction3.Right;
+        }
+
+        throw new InvalidCastException();
+    }
    
 }
 

@@ -33,7 +33,6 @@ Transform:
   m_LocalScale: {x: 65, y: 65, z: 65}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 36940943791605747}
   - {fileID: 4305196317889791768}
   - {fileID: 3288577271120826893}
   m_Father: {fileID: 0}
@@ -116,8 +115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _right: []
   _left: []
-  _foward:
-  - {fileID: 7109748836863911603}
+  _forward: []
   _back: []
   _up:
   - {fileID: 5230478184607885622}
@@ -134,19 +132,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f4ddfd63d7a4a0458cbbaf6fa249761, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weight: 50
+  _weight: 20
   _buildingStats:
     Health: 100
   targetType: 3
-  _startPosition: {x: 0, y: 0, z: 0}
   _occupyingCells:
   - _position: {x: 0, y: 0, z: 0}
+    _right: 0
+    _left: 0
+    _forward: 0
+    _back: 0
+    _up: 1
+    _down: 0
   - _position: {x: 0, y: 1, z: 0}
-  _buildingType: 0
+    _right: 0
+    _left: 0
+    _forward: 0
+    _back: 0
+    _up: 0
+    _down: 1
+  _buildingType: 1
   _direction: 3
-  _settingDirection: 0
   _buildPoints: {fileID: 3099373453460423412}
-  _constructionsFactory: {fileID: 0}
 --- !u!1 &982899749720139531
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +184,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5839968311967941611}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &5230478184607885622
 MonoBehaviour:
@@ -191,7 +198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0dd20a575baa7148a8335a985303062, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _whiteList: 00000000
+  _whiteList: 01000000
   _startOccupedCellPosition: {x: 0, y: 2, z: 0}
 --- !u!1 &3638672520423583172
 GameObject:
@@ -224,7 +231,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5839968311967941611}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &8533082101761419122
 BoxCollider:
@@ -252,49 +259,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _parent: {fileID: 5839968311967941611}
---- !u!1 &9190471887794662579
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 36940943791605747}
-  - component: {fileID: 7109748836863911603}
-  m_Layer: 0
-  m_Name: WallBuildPosition
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &36940943791605747
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9190471887794662579}
-  m_LocalRotation: {x: 0, y: 0, z: -0.7071068, w: 0.7071067}
-  m_LocalPosition: {x: -0.005479965, y: 0.0054900357, z: 0.00531599}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 5839968311967941611}
-  m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &7109748836863911603
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9190471887794662579}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f0dd20a575baa7148a8335a985303062, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _whiteList: 01000000
-  _startOccupedCellPosition: {x: 0, y: 0, z: 1}

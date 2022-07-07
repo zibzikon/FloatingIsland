@@ -4,10 +4,11 @@ using System.Linq;
 using Enums;
 using Extentions;
 using UnityEngine;
-using UnityEngine.Events;
 
-public abstract class Building : MonoBehaviour , IUpdatable, IRecyclable, ITarget, IDiethable
+public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecyclable, ITarget, IDiethable
 {
+    public Neighbors3<List<INeighbour>> Neighbors = new();
+    
     [SerializeField] private int _weight;
     public int Weight => _weight;
     
@@ -16,23 +17,18 @@ public abstract class Building : MonoBehaviour , IUpdatable, IRecyclable, ITarge
     [SerializeField] private TargetType targetType;
     public event Action PositionChanged;
     public TargetType TargetType => targetType;
-    public Transform Transform => this.transform;
-    
-    [SerializeField] private Vector3Int _startPosition;
+    public Transform Transform => transform;
     
     public Vector3Int PositionOnGameField { get; private set; }
     
-    [SerializeField] private List<OccupingCell> _occupyingCells;
+    [SerializeField] private List<OccupyingCell> _occupyingCells;
     
-    public List<OccupingCell> OccupyingCells => _occupyingCells;
+    public List<OccupyingCell> OccupyingCells => _occupyingCells;
 
     [SerializeField] private BuildingType _buildingType;
 
     [SerializeField] private Direction2 _direction = Direction2.Foward;
-
-    [SerializeField] private Direction2 _settingDirection;
     
-    public IBuildingsContainer BuildingContainer { get; private set;}
     public BuildingType BuildingType => _buildingType;
 
     private IBuildingContainer _supportBuilding;
@@ -42,32 +38,47 @@ public abstract class Building : MonoBehaviour , IUpdatable, IRecyclable, ITarge
     private static readonly IEnumerable<BuildingType> _buildingTypesCanBeSettedOnGameField = new[]
     {
         BuildingType.SupportPillar,
-        BuildingType.Wall
     };
 
-    private List<OccupingCell> _setedCells = new List<OccupingCell>();
-    public List<OccupingCell> SetedCells { 
-        get=> _setedCells;
+    private static readonly Dictionary<BuildingType, BuildingType> _dontMergeableBuildingTypes = new() {[BuildingType.SupportPillar] = BuildingType.SupportPillar };
+    
+    
+    private List<OccupyingCell> _settedCells = new List<OccupyingCell>();
+    public List<OccupyingCell> SettedCells { 
+        get=> _settedCells;
         set
         {
             if (value.Count != OccupyingCells.Count) throw new IndexOutOfRangeException();
-            _setedCells = value;
+            _settedCells = value;
         }
     }
     
     
-    public void Initialize(IBuildingsContainer buildingContainer)
-    {
-        BuildingContainer = buildingContainer;
-    }
+    public virtual void OnUpdate(){}
     
-    public void OnUpdate()
-    {
-    }
     
     public static bool CanBeSettedOnGameField(Building building)
     {
         return _buildingTypesCanBeSettedOnGameField.Contains(building._buildingType);
+    }
+    
+    public static bool CanBeMergedWithBuildings(Building building, IEnumerable<Building> buildings)
+    {
+        if (!ContainsKeyOrValue(building._buildingType)) return true;
+            
+        foreach (var building1 in buildings)
+        {
+            if (!ContainsKeyOrValue(building1.BuildingType)) continue;
+                
+            if(_dontMergeableBuildingTypes[building1.BuildingType] == building._buildingType||
+               _dontMergeableBuildingTypes[building.BuildingType] == building1._buildingType) return false;
+        }
+
+        bool ContainsKeyOrValue(BuildingType buildingType) =>
+            _dontMergeableBuildingTypes.ContainsKey(buildingType) ||
+            _dontMergeableBuildingTypes.ContainsValue(buildingType);
+
+        return true;
     }
     
     public void SetDirection(Direction2 direction)
@@ -76,7 +87,7 @@ public abstract class Building : MonoBehaviour , IUpdatable, IRecyclable, ITarge
         {
             var cell = _occupyingCells[i];
             var newPosition = cell.Position.SetDirection(_direction, direction);
-            _occupyingCells[i] = new OccupingCell(newPosition);
+            _occupyingCells[i] = OccupyingCell.Create(newPosition, new Neighbors3<bool>());
         }
         
         _direction = direction;
@@ -111,16 +122,10 @@ public abstract class Building : MonoBehaviour , IUpdatable, IRecyclable, ITarge
     }
 
 
-}
-
-[Serializable]
-public struct OccupingCell
-{
-    [SerializeField] private Vector3Int _position;
-    public Vector3Int Position => _position;
-
-    public OccupingCell(Vector3Int position)
+    public void AddNeighbour(INeighbour neighbour, Direction3 direction)
     {
-        _position = position;
+        var neighbourList = Neighbors[direction] ?? (Neighbors[direction] = new List<INeighbour>());
+        
+        neighbourList.Add(neighbour);
     }
 }

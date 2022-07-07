@@ -12,7 +12,7 @@ namespace Units.Behaviours.Diethable
 
         private bool _isAtacking;
         
-        public bool AtackingStarted { get; private set; }
+        public bool AttackingStarted { get; private set; }
         
         private readonly EnemyStats _enemyStats;
 
@@ -26,14 +26,14 @@ namespace Units.Behaviours.Diethable
         
         public void Atack(ITarget target)
         {
-            AtackingStarted = true;
+            AttackingStarted = true;
             _targetWasDied = false;
              
             _movingBehaviour.MoveTo(target);
-            StartAtack(target);
+            StartAttack(target);
         }
 
-        private async void StartAtack(ITarget target)
+        private async void StartAttack(ITarget target)
         {
             target.Died += OnDie;
             _targetWasDied = false;
@@ -58,9 +58,10 @@ namespace Units.Behaviours.Diethable
                 {
                     damagable.Damage(_enemyStats.DamageStrength);
                 }
+
                 Debug.Log("Target was damaged");
             }
-            
+
             damagable.Died -= OnDie;
             
             Debug.Log("reseted");
@@ -71,7 +72,7 @@ namespace Units.Behaviours.Diethable
         {
             _targetWasDied = true;
             _isAtacking = false;
-            AtackingStarted = false;
+            AttackingStarted = false;
         }
     }
 }

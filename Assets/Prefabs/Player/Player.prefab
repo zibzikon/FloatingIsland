@@ -175,11 +175,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93e80d972c3599543b5c478ebd57ca6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _inventoryFactory: {fileID: 11400000, guid: 912b021012a7ce54abd2b0767dd12652, type: 2}
+  _playerStats:
+    Health: 0
   _buildingFactory: {fileID: 11400000, guid: c391919aa42ef1042b717f28172253ba, type: 2}
   _buildingPointersFactory: {fileID: 11400000, guid: 59a2ca8cb35783e418eba84a5029604c,
     type: 2}
-  _playerWithWorldInteraction: {fileID: 3225395692419124023}
+  _buildingPointsFactory: {fileID: 11400000, guid: a074988f148cab74c907a8f662820783,
+    type: 2}
 --- !u!114 &3225395692419124023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192,4 +194,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbb67a43ff0e44a496d65821148d71c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _containerInteractionBehaviour: {fileID: 0}

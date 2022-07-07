@@ -8,14 +8,8 @@ using UnityEngine.AI;
 public class Garry : Enemy
 {
     protected override EnemyStats EnemyStats { get; } = new EnemyStats();
-    
+
     protected override TargetType PreferredTargetType => TargetType.Tower;
-        
-    protected override IDiethable DieBehaviour { get; set; } 
-
-    protected override IAtackable AtackBehaviour { get; set; }
-
-    protected override IMovable MovingBehaviour { get; set; }
 
     protected override void InitializeBahaviours()
     {

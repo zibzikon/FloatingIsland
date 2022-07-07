@@ -28,7 +28,7 @@ public class GameInitializer : MonoBehaviour, IUpdatable
         OnUpdate();
     }
     
-    private void Start()
+    private void Awake()
     {
         Initialize();
     }
@@ -39,7 +39,7 @@ public class GameInitializer : MonoBehaviour, IUpdatable
         mainUI.Initialize(_player);
         
         _player = Instantiate(_playerPrefab, new Vector3(20,0,20), Quaternion.identity);
-        _player.Initialize(_gameField, mainUI.transform);
+        _player.Initialize(_gameField);
         _contentToUpdate.Add(_player);
 
         _enemySpawner = new EnemySpawner(_gameField, _enemyFactory, _player);

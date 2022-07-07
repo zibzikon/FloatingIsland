@@ -19,6 +19,51 @@ namespace Extentions
 
             return neighboursList;
         }
+
+        public static Neighbors3<T> GetRotated<T>(this Neighbors3<T> neighbors, Direction2 startDirection, Direction2 direction)
+        {
+            switch (direction)
+            {
+                case Direction2.Right:
+                    switch (startDirection)
+                    {
+                        case Direction2.Right: return null;
+                        case Direction2.Left: return null;
+                        case Direction2.Foward: return null;
+                        case Direction2.Back: return null;
+                    }
+                    break;
+                case Direction2.Left: 
+                    switch (startDirection)
+                    {
+                        case Direction2.Right: return null;
+                        case Direction2.Left: return null;
+                        case Direction2.Foward: return null;
+                        case Direction2.Back: return null;
+                    }
+                    break;
+                case Direction2.Back:
+                    switch (startDirection)
+                    {
+                        case Direction2.Right: return null;
+                        case Direction2.Left: return null;
+                        case Direction2.Foward: return null;
+                        case Direction2.Back: return null;
+                    }
+                    break;
+                case Direction2.Foward:
+                    switch (startDirection)
+                    {
+                        case Direction2.Right: return null;
+                        case Direction2.Left: return null;
+                        case Direction2.Foward: return null;
+                        case Direction2.Back: return null;
+                    }
+                    break;
+            }
+
+            throw new InvalidCastException();
+        }
         
         public static IEnumerable<T> ToEnumerable<T>(this Neighbors2<T> neighbors)
         {
@@ -37,7 +82,7 @@ namespace Extentions
         public static Neighbors2<T> ToNeighbors2<T>(this Neighbors3<T> neighbors)
         {
             return new Neighbors2<T>()
-                { Right = neighbors.Right, Left = neighbors.Left, Back = neighbors.Back, Foward = neighbors.Foward };
+                { Right = neighbors.Right, Left = neighbors.Left, Back = neighbors.Back, Foward = neighbors.Forward };
         }
     }
 }

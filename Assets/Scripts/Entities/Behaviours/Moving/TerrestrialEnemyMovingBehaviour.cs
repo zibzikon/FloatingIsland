@@ -20,7 +20,7 @@ namespace Units.Behaviours
         private readonly NavMeshAgent _agent;
 
 
-        private float GetDistabceBetweenTargetAndAgent()
+        private float GetDistanceBetweenTargetAndAgent()
         {
             return Vector3.Distance(_agent.transform.position, _destinationPositoin);
         }
@@ -46,7 +46,7 @@ namespace Units.Behaviours
             Reset();
             _agent.SetDestination(GetMovingPosition(target));
             
-            while (GetDistabceBetweenTargetAndAgent() > _minRequiredDistanceToTarget)
+            while (GetDistanceBetweenTargetAndAgent() > _minRequiredDistanceToTarget)
             {
                 await Task.Delay(200);
             }

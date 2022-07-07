@@ -8,11 +8,11 @@ using UnityEngine;
 
 public class PathFinder
 {
-    private PathFindingField _pathFindingField;
+    private readonly PathFindingField _pathFindingField;
 
-    public PathFinder(GameField _gameField)
+    public PathFinder(GameField gameField)
     {
-        _pathFindingField = new PathFindingField(_gameField);
+        _pathFindingField = new PathFindingField(gameField);
     }
     
     public void Initialize()
@@ -41,7 +41,7 @@ public class PathFinder
             reachableCells.Remove(currentCell);
             exploredCells.Add(currentCell);
 
-            var newReachableCells = currentCell.Neighbors.ToNeighbors2().ToEnumerable();
+           var newReachableCells = currentCell.Neighbors.ToNeighbors2().ToEnumerable();
 
             foreach (var cell in newReachableCells)
             {
@@ -82,7 +82,8 @@ public class PathFinder
     private Stack<Cell> BuildPath(PathCell cell)
     {
         var path = new Stack<Cell>();
-        var currentCell = cell;
+        var currentCell = cell; 
+        
         while (currentCell != null)
         {
             path.Push(currentCell.GameFieldCell);
@@ -109,11 +110,11 @@ internal class PathFindingField
         var size = _gameField.Size;
         
         _pathCells = new PathCell[size.x, size.y, size.z];
-        for (int y = 0; y < size.y; y++)
+        for (var y = 0; y < size.y; y++)
         {
-            for (int x = 0; x < size.x; x++)
+            for (var x = 0; x < size.x; x++)
             {
-                for (int z = 0; z < size.z; z++)
+                for (var z = 0; z < size.z; z++)
                 {
                     var currentCell = _pathCells[x, y, z] =
                         new PathCell(_gameField.GetCellByPosition(new Vector3Int(x, y, z)));
@@ -145,7 +146,7 @@ internal class PathFindingField
 
 internal class PathCell
 {
-    public Neighbors3<PathCell> Neighbors { get; } = new Neighbors3<PathCell>();
+    public Neighbors3<PathCell> Neighbors { get; } = new();
 
     public readonly Cell GameFieldCell;
 
@@ -181,7 +182,7 @@ internal class PathCell
     public static void SetFowardBackNeighbours(PathCell foward, PathCell back)
     {
         foward.Neighbors.Back = back;
-        back.Neighbors.Foward = foward;
+        back.Neighbors.Forward = foward;
     }
     
     public static void SetUpDownNeighbours(PathCell up, PathCell down)

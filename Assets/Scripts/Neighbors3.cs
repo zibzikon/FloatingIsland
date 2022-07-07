@@ -3,17 +3,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-
 public class Neighbors3<T>
 { 
     public T Right;
     public T Left;
-    public T Foward;
+    public T Forward;
     public T Back;
     public T Up;
     public T Down;
 
     public const int Length = 6; 
+    
     public T this[Direction3 direction]
     {
         get 
@@ -25,7 +25,7 @@ public class Neighbors3<T>
 
                 case Direction3.Right: return Right;
                 case Direction3.Left: return Left;
-                case Direction3.Foward: return Foward;
+                case Direction3.Foward: return Forward;
                 case Direction3.Back: return Back;
                 case Direction3.Up: return Up;
                 case Direction3.Down: return Down;
@@ -41,7 +41,7 @@ public class Neighbors3<T>
 
                 case Direction3.Right: Right = value; break;
                 case Direction3.Left: Left = value; break;
-                case Direction3.Foward: Foward = value; break;
+                case Direction3.Foward: Forward = value; break;
                 case Direction3.Back: Back = value; break;
                 case Direction3.Up: Up = value;break;
                 default: Down = value; break;
@@ -57,7 +57,7 @@ public class Neighbors3<T>
             {
                 case 0: return Right;
                 case 1: return Left;
-                case 2: return Foward;
+                case 2: return Forward;
                 case 3: return Back;
                 case 4: return Up;
                 case 5: return Down;
@@ -72,7 +72,7 @@ public class Neighbors3<T>
                     break;
                 case 1: Left = value;
                     break;
-                case 2: Foward = value;                   
+                case 2: Forward = value;                   
                     break;
                 case 3: Back = value;                   
                     break;
@@ -85,6 +85,7 @@ public class Neighbors3<T>
             }
         }
     }
+    
 }
 
 public class Neighbors2<T>

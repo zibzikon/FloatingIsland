@@ -1,23 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Factories.Building;
 using UnityEngine;
 
 public class BuildingWithChilds : Building, IUpdatable, IBuildingContainer
 {
     [SerializeField] protected BuildPoints _buildPoints;
-
-    [SerializeField] private ConstructionsFactory _constructionsFactory;
     
-    private void Start()
+    private List<Building> _childBuildings = new();
+
+    public Vector3 WorldPosition => transform.position;
+
+    private void Awake()
     {
-        foreach (var direction in DirectionExtentions.GetDirectionEnumerable())
-        {
-            foreach (var buildPoint in _buildPoints.Points[direction])
-            {
-                buildPoint.Initialize(direction);
-            }
-        }
+        _buildPoints.Initialize(this);
     }
     
     private static readonly IEnumerable<BuildingType> BuildingTypesWithChilds = new[]
@@ -26,35 +22,32 @@ public class BuildingWithChilds : Building, IUpdatable, IBuildingContainer
         BuildingType.Wall
     };
 
-    public IEnumerable<BuildPoint> GetCorrectBuildPoints(Building building)
+    public IEnumerable<BuildPoint> GetCorrectBuildPoints(BuildingType buildingType)
     {
         var allCorrectBuildPoints = new List<BuildPoint>();
-        for (int i = 0; i < Neighbors3<BuildPoint>.Length; i++)
+        for (var i = 0; i < Neighbors3<BuildPoint>.Length; i++)
         {
            var correctBuildPoints = 
-               _buildPoints.Points[i].Where(buildPoint => buildPoint.WhiteList.Contains(building.BuildingType));
+               _buildPoints.Points[i].Where(buildPoint => buildPoint.BuildingCanBeSetted(buildingType));
            allCorrectBuildPoints.AddRange(correctBuildPoints);
         }
 
         return allCorrectBuildPoints;
     }
 
-    public IEnumerable<Direction3> GetGetCorrectBuildPointsDirections(Building building)
+    public void AddChildBuilding(Building building, Direction3 direction)
     {
-        var buildPoints = GetCorrectBuildPoints(building);
+        var buildPoint = _buildPoints.Points[direction]
+            .FirstOrDefault(buildPoint => buildPoint.BuildingCanBeSetted(building.BuildingType));
+
+        if (buildPoint == null) throw new InvalidOperationException();
         
-        var directions = new List<Direction3>();
-
-        foreach (var buildPoint in buildPoints)
-        {
-            if (!directions.Contains(buildPoint.Direction))
-            {
-                directions.Add(buildPoint.Direction);
-            }
-        }
-
-        return directions;
+        buildPoint.WasSetted = true;
+        
+        AddNeighbour(building, direction);
+        building.AddNeighbour(this, direction.GetOppositeDirection());
     }
+
 
     public void SetBuildPointsPositions()
     {

@@ -11,14 +11,14 @@ public class Cell
     
     public readonly Neighbors3<Cell> Neighbours = new();
 
-    private List<Building> _setedBuildings = new();
-    public IEnumerable<Building> SetedBuildings => _setedBuildings;
+    private List<Building> _settedBuildings = new();
+    public IEnumerable<Building> SettedBuildings => _settedBuildings;
     
     public bool IsFilled { get; private set; }
 
-    public int Ccapacity { get; private set; } = 100;
+    public int Capacity { get; private set; } = 100;
 
-    public bool IsBlocked => Ccapacity <= 60;
+    public bool IsBlocked => Capacity <= 60;
     
     public Cell(Vector3Int position)
     {
@@ -27,19 +27,19 @@ public class Cell
 
     public void SetBuilding(Building building)
     {
-        if (building.Weight > Ccapacity) throw new IndexOutOfRangeException();
-        Ccapacity -= building.Weight;
+        if (building.Weight > Capacity) throw new IndexOutOfRangeException();
+        Capacity -= building.Weight;
         building.Died += OnBuildingDestroyed;
-        _setedBuildings.Add(building);
+        _settedBuildings.Add(building);
         Changed?.Invoke();
     }
     
     public void RemoveBuilding(Building building)
     {
         building.Died -= OnBuildingDestroyed;
-        if (Ccapacity + building.Weight > 100) throw new IndexOutOfRangeException();
-        Ccapacity += building.Weight;
-        _setedBuildings.Remove(building);
+        if (Capacity + building.Weight > 100) throw new IndexOutOfRangeException();
+        Capacity += building.Weight;
+        _settedBuildings.Remove(building);
         Changed?.Invoke();
     }
     
@@ -53,7 +53,7 @@ public class Cell
 
     public void Reset()
     {
-        _setedBuildings.ForEach(building => building.Died -= OnBuildingDestroyed);
+        _settedBuildings.ForEach(building => building.Died -= OnBuildingDestroyed);
     }
     
     public static void SetRightLeftNeighbours(Cell right, Cell left)
@@ -65,7 +65,7 @@ public class Cell
     public static void SetFowardBackNeighbours(Cell foward, Cell back)
     {
         foward.Neighbours.Back = back;
-        back.Neighbours.Foward = foward;
+        back.Neighbours.Forward = foward;
     }
     
     public static void SetUpDownNeighbours(Cell up, Cell down)

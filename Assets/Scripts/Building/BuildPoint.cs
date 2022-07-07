@@ -6,7 +6,12 @@ using UnityEngine;
 public class BuildPoint: MonoBehaviour
 {
     [SerializeField] private List<BuildingType> _whiteList;
-    public List<BuildingType> WhiteList => _whiteList;
+    public bool BuildingCanBeSetted(BuildingType buildingType) => _whiteList.Contains(buildingType) && WasSetted == false;
+    
+    public bool WasSetted { get; set; }
+
+    public IBuildingContainer BuildingContainer { get; private set; }
+    
     
     [SerializeField] private Vector3Int _startOccupedCellPosition;
     public Vector3Int OccupedCellPosition { get; private set; }
@@ -15,9 +20,15 @@ public class BuildPoint: MonoBehaviour
     
     public Vector3 BuildPosition => GetComponent<Transform>().position;
 
-    public void Initialize(Direction3 direction)
+    public void Initialize(IBuildingContainer buildingContainer, Direction3 direction)
     {
+        BuildingContainer = buildingContainer;
         Direction = direction;
+    }
+
+    public Vector3 GetBuildPosition(Vector3 startPosition)
+    {
+        return startPosition + transform.localPosition;
     }
     
     public void SetPosition(Vector3Int parentPosition)

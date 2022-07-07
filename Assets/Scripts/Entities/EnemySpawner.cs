@@ -30,7 +30,7 @@ public class EnemySpawner : ITargetContainer, IUpdatable
     {
         if (preferredTargetType == TargetType.Player) return _player;
         
-        var startCell = _gameField.GetCellByWorldPosition(startPosition);
+        var startCell = _gameField.GetCellByPosition(GameField.ConvertWorldToGameFieldPosition(startPosition));
 
         var reachableCells = new Stack<Cell>();
         reachableCells.Push(startCell);
@@ -43,7 +43,7 @@ public class EnemySpawner : ITargetContainer, IUpdatable
             var currentCell = reachableCells.Pop();
             exploredCells.Add(currentCell);
             
-            var cellSettedBuildings = currentCell.SetedBuildings;
+            var cellSettedBuildings = currentCell.SettedBuildings;
 
             var settedBuildings = cellSettedBuildings as Building[] ?? cellSettedBuildings.ToArray();
             if (settedBuildings.Any())
@@ -68,11 +68,11 @@ public class EnemySpawner : ITargetContainer, IUpdatable
 
         }
 
-        ITarget blockingTarget = closestCellWithTarget != null ? GetBlockingTarget(startCell.Position, 
+        var blockingTarget = closestCellWithTarget != null ? GetBlockingTarget(startCell.Position, 
             closestCellWithTarget.Position) :null;
-        var playerCell = _gameField.GetCellByWorldPosition(_player.Transform.position);
+        var playerCell = _gameField.GetCellByPosition(GameField.ConvertWorldToGameFieldPosition(_player.Transform.position));
         
-        return blockingTarget ?? ( closestCellWithTarget?.SetedBuildings.First() ?? _player.WasDied ? null 
+        return blockingTarget ?? ( closestCellWithTarget?.SettedBuildings.First() ?? _player.WasDied ? null 
             :( GetBlockingTarget(startCell.Position ,playerCell.Position) ?? _player ));
     }
 
@@ -84,11 +84,11 @@ public class EnemySpawner : ITargetContainer, IUpdatable
         {
             if (cell.IsBlocked)
             {
-                return cell.SetedBuildings.FirstOrDefault();
+                return cell.SettedBuildings.FirstOrDefault();
             }
             cell = path.Pop();
         }
-        return cell.SetedBuildings.FirstOrDefault();
+        return cell.SettedBuildings.FirstOrDefault();
     }
     
 
