@@ -1,6 +1,6 @@
 using System;
 
-public interface IDamagable : IDiethable
+public interface IDamagable : IDestroyable
 {
     public void Damage(int count);
 }

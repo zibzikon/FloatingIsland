@@ -1,10 +1,14 @@
 
+using Enums;
+
 public class EnemyStats: EntityStats
 {
-    public int AtackInterval { get; set; } = 3;
+    public int AttackInterval { get; set; }
     
-    public int DamageStrength { get; set; } = 50;
+    public int DamageStrength { get; set; } 
 
-    public float MinRequiredDistanceToTarget { get; set; } = 5f;
+    public float MinRequiredDistanceToTarget { get; set; } 
+    
+    public TargetType PreferredTargetType { get; set; }
 }
 

@@ -12,7 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47995632f12228342b25f60f23b3e967, type: 3}
   m_Name: Building Factory
   m_EditorClassIdentifier: 
-  _supportPillarPrefab: {fileID: 4262796798059710654, guid: d0763afabfe3d1742ae8d4c8932c9035,
+  _supportPillarPrefab: {fileID: 5753314176963423359, guid: d0763afabfe3d1742ae8d4c8932c9035,
     type: 3}
-  _wallPrefab: {fileID: 1541795793581311489, guid: f17056281a2ed194e9e5df6f3dec9e8f,
+  _wallPrefab: {fileID: 307127851715274308, guid: f17056281a2ed194e9e5df6f3dec9e8f,
+    type: 3}
+  _towerPrefab: {fileID: 7376703438836851522, guid: 7a84cdb7e7ca3dc4e974944ab2002117,
+    type: 3}
+  _turretPrefab: {fileID: 2760308845185076432, guid: 7961dea2cfa72e344a9d9c072e526c9c,
     type: 3}

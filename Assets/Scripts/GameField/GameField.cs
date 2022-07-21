@@ -5,11 +5,11 @@ using Extentions;
 using UnityEngine;
 
 
-public class GameField : MonoBehaviour
+public class GameField : MonoBehaviour, IBuildingsContainer
 {
 
     private Cell[,,] _cells;
-    public readonly Vector3Int Size = new(6, 2, 6);
+    public readonly Vector3Int Size = new(6, 4, 6);
     [SerializeField] private GameFieldCellView _cellViewPrefab;
     [SerializeField] private Transform _debugObjectTransform;
 
@@ -60,33 +60,59 @@ public class GameField : MonoBehaviour
     }
 
 
-    public bool TrySetBuilding(Building building,  BuildPoint buildPoint,
-        bool firstSetting)
+    public bool TrySetBuilding(Building building,  BuildPoint buildPoint)
     {
         buildPoint.BuildingContainer.SetBuildPointsPositions();
-        if (TrySetCells(building, GetCellByPosition(buildPoint.OccupedCellPosition), firstSetting) == false)
-            return false;
-        
-        building.SetSupportBuilding(buildPoint.BuildingContainer);
-        buildPoint.BuildingContainer.AddChildBuilding(building, buildPoint.Direction);
         building.SetPositionOnGameField(buildPoint.OccupedCellPosition);
+        
+        if (building.ValidateSetSupportBuilding(buildPoint.BuildingContainer) == false ||
+            TrySetCells(building) == false)
+            return false;
+
+        SubscribeBuilding(building);
+        building.SetSupportBuilding(buildPoint, buildPoint.Direction);
         building.transform.position = buildPoint.GetBuildPosition(buildPoint.BuildingContainer.WorldPosition);
         Debug.Log("buildingWasSetted");
         return true;
     }
 
-    public bool TrySetBuilding(Building building, Cell startCell, bool firstSetting)
+    public bool TrySetBuilding(Building building)
     {
-        if (TrySetCells(building, startCell, firstSetting) == false) return false;
+        var startCell = GetCellByPosition(building.PositionOnGameField);
+        if (TrySetCells(building) == false) return false;
+        SubscribeBuilding(building);
+        building.DirectionChanged += OnBuildingDirectionChanged;
+        building.Destroyed += OnBuildingDirectionChanged;
         building.transform.position = startCell.WorldPosition;
-
-        building.SetPositionOnGameField(startCell.Position);
         Debug.Log("buildingWasSetted");
         return true;
     }
 
-    private bool TrySetCells(Building building, Cell startCell, bool firstSetting)
+    private void SubscribeBuilding(Building building)
     {
+        building.Destroyed += OnBuildingDied;
+        building.DirectionChanged += OnBuildingDirectionChanged;
+    }
+    
+    private void OnBuildingDirectionChanged(object sender)
+    {
+        var building = sender as Building;
+        if (sender is Building == false) throw new InvalidOperationException();
+        TrySetCells(building);
+    }
+
+    private void OnBuildingDied(object sender)
+    {
+        var building = sender as Building;
+
+        if (sender is Building == false) throw new InvalidOperationException();
+        building.Destroyed -= OnBuildingDied;
+        building.DirectionChanged -= OnBuildingDirectionChanged;
+    }
+    
+    private bool TrySetCells(Building building)
+    {
+        var startCell = GetCellByPosition(building.PositionOnGameField);
         var cells = new List<Cell>();
         var occupyingCells = new List<OccupyingCell>();
 
@@ -108,6 +134,7 @@ public class GameField : MonoBehaviour
                     
                     building.AddNeighbour(settedBuilding, direction);
                     settedBuilding.AddNeighbour(building, direction.GetOppositeDirection());
+                    
                     bool NeighbourIsSetted(Building startBuilding, Building possibleNeighbour)=>
                      startBuilding.Neighbors[direction]?.Contains(possibleNeighbour) ?? false;
                 }
@@ -115,7 +142,8 @@ public class GameField : MonoBehaviour
             
             var occupyingCellPosition = startCell.Position + occupyingCell.Position;
             var cell = GetCellByPosition(occupyingCellPosition);
-            if (cell.IsFilled || cell.Capacity < building.Weight || !Building.CanBeMergedWithBuildings(building, cell.SettedBuildings)) return false;
+            if (cell.IsFilled || cell.Capacity < building.Weight || 
+                !Building.CanBeMergedWithBuildings(building, cell.SettedBuildings)) return false;
             cells.Add(cell);
             occupyingCells.Add(OccupyingCell.Create(occupyingCellPosition, occupyingCell.SettedNeighbours));
         }
@@ -161,4 +189,18 @@ public class GameField : MonoBehaviour
             }
         }
     }
+
+    public bool CellsIsFreeToSet(Building building ,List<OccupyingCell> occupyingCells)
+    {
+        var buildingPosition = building.PositionOnGameField;
+        foreach (var occupyingCell in occupyingCells)
+        {
+            var currentCell = GetCellByPosition(occupyingCell.Position + buildingPosition);
+            if (!currentCell.SettedBuildings.Contains(building) && !currentCell.BuildingCanBeSettedOnCell(building))
+                return false;
+        }
+
+        return true;
+    }
+    
 }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Threading.Tasks;
-using Interfaces;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -19,6 +15,7 @@ namespace Units.Behaviours
 
         private readonly NavMeshAgent _agent;
 
+        private bool _targetIsSetted;
 
         private float GetDistanceBetweenTargetAndAgent()
         {
@@ -29,36 +26,44 @@ namespace Units.Behaviours
         {
             _agent = agent;
             _minRequiredDistanceToTarget = minRequiredDistanceToTarget;
+            
         }
         
         private Vector3 GetMovingPosition(ITarget targetTransform)
         {
             const int maxDistance = 20;
-            NavMesh.SamplePosition(targetTransform.Transform.position,out var hit,
+            NavMesh.SamplePosition(targetTransform.Transform.position, out var hit,
                 maxDistance, NavMesh.AllAreas);
 
             _destinationPositoin = hit.position;
             return _destinationPositoin;
         }
         
-        public async void MoveTo(ITarget target)
+        
+        public void MoveTo(ITarget target)
         {
+            if (target.IsDestroyed) return;
+            
             Reset();
             _agent.SetDestination(GetMovingPosition(target));
-            
-            while (GetDistanceBetweenTargetAndAgent() > _minRequiredDistanceToTarget)
-            {
-                await Task.Delay(200);
-            }
-            _agent.ResetPath();
-            _agent.velocity = Vector3.zero;
-            TargetWasReached = true;
+            _targetIsSetted = true;
         }
 
         private void Reset()
         {
             _destinationPositoin = Vector3.zero;
             TargetWasReached = false;
+            _targetIsSetted = false;
+        }
+
+        public void OnUpdate()
+        {
+            if (_targetIsSetted && GetDistanceBetweenTargetAndAgent() <= _minRequiredDistanceToTarget)
+            {
+                _agent.ResetPath();
+                _agent.velocity = Vector3.zero;
+                TargetWasReached = true;
+            }
         }
     }
 }

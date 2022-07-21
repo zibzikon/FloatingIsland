@@ -25,19 +25,25 @@ public class Cell
         Position = position;
     }
 
+    public bool BuildingCanBeSettedOnCell(Building building) =>
+        building.Weight < Capacity && Building.CanBeMergedWithBuildings(building, _settedBuildings);
+    
+    
+    
     public void SetBuilding(Building building)
     {
         if (building.Weight > Capacity) throw new IndexOutOfRangeException();
         Capacity -= building.Weight;
-        building.Died += OnBuildingDestroyed;
+        building.Destroyed += OnBuildingDestroyed;
+        building.DirectionChanged += OnBuildingDestroyed;
         _settedBuildings.Add(building);
         Changed?.Invoke();
     }
     
     public void RemoveBuilding(Building building)
     {
-        building.Died -= OnBuildingDestroyed;
-        if (Capacity + building.Weight > 100) throw new IndexOutOfRangeException();
+        building.Destroyed -= OnBuildingDestroyed;
+        building.DirectionChanged -= OnBuildingDestroyed;
         Capacity += building.Weight;
         _settedBuildings.Remove(building);
         Changed?.Invoke();
@@ -47,13 +53,11 @@ public class Cell
     {
         var building = (Building)sender;
         RemoveBuilding(building);
-        
-        building.Died -= OnBuildingDestroyed;
     }
 
     public void Reset()
     {
-        _settedBuildings.ForEach(building => building.Died -= OnBuildingDestroyed);
+        _settedBuildings.ForEach(building => building.Destroyed -= OnBuildingDestroyed);
     }
     
     public static void SetRightLeftNeighbours(Cell right, Cell left)

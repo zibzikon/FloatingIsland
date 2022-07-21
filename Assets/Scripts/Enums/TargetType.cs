@@ -4,8 +4,9 @@ namespace Enums
     {
         None,
         Player,
-        Turret,
+        Enemy,
+        Tower,
         Wall,
-        Tower
+        DefenceTower
     }
 }

@@ -82,7 +82,7 @@ namespace Extentions
         public static Neighbors2<T> ToNeighbors2<T>(this Neighbors3<T> neighbors)
         {
             return new Neighbors2<T>()
-                { Right = neighbors.Right, Left = neighbors.Left, Back = neighbors.Back, Foward = neighbors.Forward };
+                { Right = neighbors.Right, Left = neighbors.Left, Back = neighbors.Back, Forward = neighbors.Forward };
         }
     }
 }

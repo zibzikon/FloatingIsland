@@ -1,6 +1,9 @@
 
-public interface IAtackable
+public interface IAtackable : IUpdatable
 {
     public bool AttackingStarted { get; }
-    public void Atack(ITarget target);
+    
+    public bool AttackingIsAvailable { get; }
+    
+    public void SetAttackingTarget(ITarget target);
 }

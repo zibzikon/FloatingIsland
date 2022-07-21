@@ -1,12 +1,7 @@
 ﻿using UnityEngine;
 
-public class PlayerWithWorldInteraction : MonoBehaviour, IUpdatable
+public class PlayerInteraction : IUpdatable
 {
-    
-    public void Initialize(Transform generalCanvas)
-    {
-    }
-
     public void OnUpdate()
     {
     }

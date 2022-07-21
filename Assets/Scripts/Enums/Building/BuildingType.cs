@@ -2,6 +2,8 @@
 {
     None,
     SupportPillar,
-    Wall
+    Wall,
+    Tower,
+    Turret
 }
 

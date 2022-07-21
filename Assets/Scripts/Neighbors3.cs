@@ -92,7 +92,7 @@ public class Neighbors2<T>
 { 
     public T Right;
     public T Left;
-    public T Foward;
+    public T Forward;
     public T Back;
 
     public const int Length = 4; 
@@ -107,7 +107,7 @@ public class Neighbors2<T>
 
                 case Direction3.Right: return Right;
                 case Direction3.Left: return Left;
-                case Direction3.Foward: return Foward;
+                case Direction3.Foward: return Forward;
                 case Direction3.Back: return Back;
                 default: throw new NullReferenceException();
             }
@@ -121,7 +121,7 @@ public class Neighbors2<T>
 
                 case Direction3.Right: Right = value; return;
                 case Direction3.Left: Left = value; return;
-                case Direction3.Foward: Foward = value; return;
+                case Direction3.Foward: Forward = value; return;
                 case Direction3.Back: Back = value; return;
             }
         }
@@ -135,7 +135,7 @@ public class Neighbors2<T>
             {
                 case 0: return Right;
                 case 1: return Left;
-                case 2: return Foward;
+                case 2: return Forward;
                 case 3: return Back;
                 default: throw new IndexOutOfRangeException();
             }
@@ -148,7 +148,7 @@ public class Neighbors2<T>
                     break;
                 case 1: Left = value;
                     break;
-                case 2: Foward = value;                   
+                case 2: Forward = value;                   
                     break;
                 case 3: Back = value;                   
                     break;

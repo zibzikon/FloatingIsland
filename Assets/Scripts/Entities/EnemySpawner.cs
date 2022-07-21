@@ -72,7 +72,7 @@ public class EnemySpawner : ITargetContainer, IUpdatable
             closestCellWithTarget.Position) :null;
         var playerCell = _gameField.GetCellByPosition(GameField.ConvertWorldToGameFieldPosition(_player.Transform.position));
         
-        return blockingTarget ?? ( closestCellWithTarget?.SettedBuildings.First() ?? _player.WasDied ? null 
+        return blockingTarget ?? ( closestCellWithTarget?.SettedBuildings.First() ?? _player.IsDestroyed ? null 
             :( GetBlockingTarget(startCell.Position ,playerCell.Position) ?? _player ));
     }
 
@@ -99,12 +99,24 @@ public class EnemySpawner : ITargetContainer, IUpdatable
 
     public void SpawnEnemy()
     {
-       _enemies.Add(_enemyFactory.Get(EnemyType.Garry, this, new Vector3(1,0,1)));
+        var enemy = _enemyFactory.Get(EnemyType.Garry, this, new Vector3(1, 0, 1));
+        enemy.Destroyed += OnEnemyDied;
+        
+       _enemies.Add(enemy);
+    }
+
+    private void OnEnemyDied(object sender)
+    {
+        var enemy = (Enemy)sender;
+        if (enemy == null) throw new InvalidOperationException();
+        
+        _enemies.Remove(enemy);
+        enemy.Destroyed -= OnEnemyDied;
     }
     
     public void OnUpdate()
     {
-        _enemies.ForEach(enemy=>enemy.OnUpdate());
+        _enemies.ForEach(enemy => enemy.OnUpdate());
     }
 }
 

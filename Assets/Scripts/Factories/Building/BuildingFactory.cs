@@ -8,6 +8,8 @@ namespace Factories.Building
     {
         [SerializeField]private global::Building _supportPillarPrefab;
         [SerializeField]private global::Building _wallPrefab;
+        [SerializeField]private global::Building _towerPrefab;
+        [SerializeField]private global::Building _turretPrefab;
         
         public global::Building GetNewBuilding(BuildingType type)
         {
@@ -17,6 +19,10 @@ namespace Factories.Building
                     return GetNewBuilding(_supportPillarPrefab);
                 case BuildingType.Wall:
                     return GetNewBuilding(_wallPrefab);
+                case BuildingType.Tower:
+                    return GetNewBuilding(_towerPrefab);
+                case BuildingType.Turret:
+                    return GetNewBuilding(_turretPrefab);
             }
             
             throw new NullReferenceException();

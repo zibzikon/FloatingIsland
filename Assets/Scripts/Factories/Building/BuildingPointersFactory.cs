@@ -7,7 +7,7 @@ namespace Factories.Building
     public class BuildingPointersFactory: ScriptableObject
     {
         [SerializeField] 
-        private BuildingPointer _buildPointerPrefab;
+        private BuildPointer _buildPointerPrefab;
 
         private Dictionary<Direction3, Quaternion> _directionToRtation = new()
         {
@@ -19,15 +19,15 @@ namespace Factories.Building
             [Direction3.Down] = new Quaternion()
         };
 
-        public BuildingPointer GetNewBuildPointer(Direction3 direction, Vector3 offset, Vector3 spawnPosition)
+        public BuildPointer GetNewBuildPointer(Direction3 direction, Vector3 offset, Vector3 spawnPosition)
         {
-            var instance = Instantiate(_buildPointerPrefab, spawnPosition + offset, _directionToRtation[direction]).GetComponent<BuildingPointer>();
+            var instance = Instantiate(_buildPointerPrefab, spawnPosition + offset, _directionToRtation[direction]).GetComponent<BuildPointer>();
             instance.Initialize( direction);
             return instance;
         }
-        public void DestroyBuildingPointer( BuildingPointer buildingPointer)
+        public void DestroyBuildingPointer( BuildPointer buildPointer)
         {
-            Destroy(buildingPointer.gameObject);
+            Destroy(buildPointer.gameObject);
         }
     }
 }

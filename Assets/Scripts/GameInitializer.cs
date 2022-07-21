@@ -18,6 +18,9 @@ public class GameInitializer : MonoBehaviour, IUpdatable
 
     [SerializeField] private EnemyFactory _enemyFactory;
     
+    [SerializeField] private PlayerUI _playerUI;
+
+    
     private List<IUpdatable> _contentToUpdate = new();
 
     private EnemySpawner _enemySpawner;
@@ -35,11 +38,8 @@ public class GameInitializer : MonoBehaviour, IUpdatable
     
     private void Initialize()
     {
-        var mainUI = Instantiate(_mainUIPrefab, _generalCanvas.transform);
-        mainUI.Initialize(_player);
-        
         _player = Instantiate(_playerPrefab, new Vector3(20,0,20), Quaternion.identity);
-        _player.Initialize(_gameField);
+        _player.Initialize(_gameField, _playerUI);
         _contentToUpdate.Add(_player);
 
         _enemySpawner = new EnemySpawner(_gameField, _enemyFactory, _player);

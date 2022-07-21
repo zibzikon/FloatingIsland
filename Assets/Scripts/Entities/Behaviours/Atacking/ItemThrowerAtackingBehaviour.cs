@@ -4,15 +4,22 @@ namespace Units.Behaviours.Atacking
     {
         private IMovable _movingBehaviour;
         public bool AttackingStarted { get; private set; }
+        
+        public bool AttackingIsAvailable { get; }
+        public void SetAttackingTarget(ITarget target)
+        {
+            
+        }
+
 
         public ItemThrowerAtackingBehaviour(IMovable movingBehaviour)
         {
             _movingBehaviour = movingBehaviour;
         }
-        
-        public void Atack(ITarget target)
+
+        public void OnUpdate()
         {
-            AttackingStarted = true;
+            throw new System.NotImplementedException();
         }
     }
 }
