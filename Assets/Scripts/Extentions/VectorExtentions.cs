@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace Extentions
 {
@@ -54,7 +55,13 @@ namespace Extentions
             }
         }
 
-
+        public static Vector3 GetRandomVector(Vector3 minRotation, Vector3 maxRotation)
+        {
+            return new Vector3(Random.Range(minRotation.x, maxRotation.x),
+                Random.Range(minRotation.y, maxRotation.y),
+                Random.Range(minRotation.z, maxRotation.z));
+        }
+        
         public static Vector2Int Rotate(this Vector2Int v, float degrees)
         { 
             float degToRad = (Mathf.PI/ 180) * degrees;

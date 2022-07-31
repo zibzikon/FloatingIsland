@@ -33,7 +33,7 @@ namespace Units.Behaviours.Diethable
             AttackingStarted = true;
             _currentTarget = target;
             _attackingInterval = _enemyStats.AttackInterval;
-            _movingBehaviour.MoveTo(target);
+            _movingBehaviour.SetTarget(target);
             target.Destroyed += OnTargetDestroyed;
         }
 
@@ -49,7 +49,7 @@ namespace Units.Behaviours.Diethable
 
         public void OnUpdate()
         {
-            if (_currentTarget != null && _currentTarget.IsDestroyed == false) 
+            if (_currentTarget != null && _movingBehaviour.TargetWasReached && _currentTarget.IsDestroyed == false) 
             {
                 _attackingInterval -= Time.deltaTime;
                 if (_attackingInterval <= 0)
@@ -62,7 +62,7 @@ namespace Units.Behaviours.Diethable
 
         private void DamageTarget()
         {
-            _currentTarget.Damage(_enemyStats.DamageStrength);
+            _currentTarget.TakeDamage(_enemyStats.DamageStrength);
         }
     }
 }

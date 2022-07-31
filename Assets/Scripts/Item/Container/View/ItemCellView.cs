@@ -1,4 +1,5 @@
 using System;
+using Enums;
 using Factories.Item.View;
 using Interfaces;
 using UnityEngine;
@@ -6,8 +7,8 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
 public class ItemCellView : Button, ISwitchable
-{
-    [SerializeField] private ItemsViewFactory _itemsViewFactory;
+{ 
+    private ItemsViewFactory _itemsViewFactory;
     public RectTransform RectTransform { get; private set;} 
     public ItemCell ItemCellModel { get; private set; }
 
@@ -17,9 +18,11 @@ public class ItemCellView : Button, ISwitchable
         onClick.AddListener(OnButtonClick);
     }
 
-    public void Initialize(ItemCell itemCellModel)
+    public void Initialize(ItemCell itemCellModel, ItemsViewFactory itemsViewFactory)
     {
         ItemCellModel = itemCellModel;
+
+        _itemsViewFactory = itemsViewFactory;
         
         itemCellModel.ContentChanged += OnItemCellContentChanged;
         
@@ -28,9 +31,9 @@ public class ItemCellView : Button, ISwitchable
 
     private void OnButtonClick()
     {
-        if ( ItemCellModel.Content == null) return;
+        if ( ItemCellModel.Item == null) return;
 
-        ItemCellModel.Content.Select();
+        ItemCellModel.Item.Select();
     }
     
     protected override void OnEnable()
@@ -59,13 +62,13 @@ public class ItemCellView : Button, ISwitchable
 
     private void UpdateView()
     { 
-        var content = ItemCellModel.Content;
+        var content = ItemCellModel.Item;
         
-        if (content == null) return;
+        if (content.ItemType == ItemType.None) return;
         
-        var itemView = _itemsViewFactory.Get(content.ItemType, transform);
+        var itemView = _itemsViewFactory.Get(content, transform);
        
-       itemView.transform.position = transform.position;
+        itemView.transform.position = transform.position;
     }
 
     public void Enable()

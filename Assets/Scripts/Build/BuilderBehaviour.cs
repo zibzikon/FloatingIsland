@@ -28,7 +28,10 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     private List<BuildPoint> _correctPoints = new();
     
     private bool _buildingSettedOnGameField;
-    
+    public bool IsBuilding { get; private set; }
+
+    public bool BuildingEndedOnThisFrame { get; private set; }
+
     public BuilderBehaviour(GameField gameField,BuildingFactory buildingFactory, 
         BuildingPointersFactory buildingPointersFactory, Camera mainCamera)
     {
@@ -40,6 +43,10 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
 
     public void OnUpdate()
     {
+        if (!IsBuilding)
+        {
+            BuildingEndedOnThisFrame = false;
+        }
         foreach (var building in _setedBuildings)
         {
             building.OnUpdate();
@@ -53,7 +60,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         if ( _selectedBuilding == null)
         {            
 
-            var selectedBuilding= TrySelectItem()?.GetComponent<BuildingWithChilds>();
+            var selectedBuilding= RayCast.TrySelectItem(_mainCamera)?.GetComponent<BuildingWithChilds>();
             if (selectedBuilding != null && selectedBuilding != _currentBuilding)
             {
                 _selectedBuilding = selectedBuilding;
@@ -61,7 +68,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
             }
             else if(Building.CanBeSettedOnGameField(_currentBuilding))
             {
-                var hit = GetRaycastHitByMousePosition(_mainCamera);
+                var hit = RayCast.GetRaycastHitByMousePosition(_mainCamera);
                 _currentBuilding.SetPositionOnGameField(_gameField.GetCellByPosition
                     (GameField.ConvertWorldToGameFieldPosition(hit.point)).Position);
                 if (_gameField.TrySetBuilding(_currentBuilding))
@@ -70,7 +77,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         }
         else if (_selectedBuilding != null && _selectedBuildPointer == null)
         {
-            _selectedBuildPointer = TrySelectItem()?.GetComponent<BuildPointer>();
+            _selectedBuildPointer =RayCast.TrySelectItem(_mainCamera)?.GetComponent<BuildPointer>();
             if (_selectedBuildPointer != null)
             {
                 OnPointerSelected(_selectedBuildPointer);
@@ -83,6 +90,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         if (_currentBuilding != null) return;
         _currentBuilding = _buildingFactory.GetNewBuilding(type);
         _currentBuilding.Initialize();
+        IsBuilding = true;
     }
 
     private List<BuildPointer> SpawnBuildingPointers(Vector3 position, Vector3 size)
@@ -105,19 +113,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         return buildingPointers;
     }
 
-    private Transform TrySelectItem()
-    {
-        var hitedCollider = GetRaycastHitByMousePosition(_mainCamera).collider;
-        if (hitedCollider == null) return null;       
-            var collisionObject = hitedCollider.GetComponent<CollisionObject>();
-        return collisionObject != null ? collisionObject.Parent : null;
-    }
 
-    private static RaycastHit GetRaycastHitByMousePosition(Camera camera)
-    {
-        var ray = camera.ScreenPointToRay(Mouse.current.position.ReadValue());
-        return Physics.Raycast(ray, out var hit) ? hit : new RaycastHit();
-    }
     
     private bool CheckBuildingSettingAvialible()
     {
@@ -158,6 +154,8 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
             return;
         _setedBuildings.AddBuilding(_currentBuilding);
         Reset();
+        IsBuilding = false;
+        BuildingEndedOnThisFrame = true;
         Debug.Log("Setting Building Was Accepted");
     }
 
@@ -182,6 +180,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     {
         _selectedBuilding = null;
         _selectedBuildPointer = null;
+        IsBuilding = false;
         _spawnedPointers.DestroyObjects();
         _spawnedPointers.Clear();
         _correctPoints.Clear();

@@ -25,9 +25,9 @@ public class Garry : Enemy
         };
     }
     
-    protected override void InitializeBahaviours()
+    protected override void InitializeBehaviours()
     {
-        MovingBehaviour = new TerrestrialEnemyMovingBehaviour(GetComponent<NavMeshAgent>(), EnemyStats.MinRequiredDistanceToTarget);
+        MovingBehaviour = new TerrestrialEntityMovingBehaviour(GetComponent<NavMeshAgent>(), EnemyStats.MinRequiredDistanceToTarget);
         AtackBehaviour = new TerrestrialEnemyAttackingBehaviour(MovingBehaviour, EnemyStats);
     }
 

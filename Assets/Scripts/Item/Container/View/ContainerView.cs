@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Factories.Item.View;
 using Interfaces;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,7 +8,9 @@ public abstract class ContainerView : MonoBehaviour , ISwitchable
 {
     [SerializeField] private GridLayout _itemsContainerLayout;
   
-    [SerializeField] private ItemCellView _itemCellViewPrefab; 
+    [SerializeField] private ItemCellView _itemCellViewPrefab;
+
+    [SerializeField] private ItemsViewFactory _itemsViewFactory;
     protected abstract ItemsContainer ItemsContainerModel { get; }
 
     protected ItemCellView[,] ItemCellViews;
@@ -43,10 +46,10 @@ public abstract class ContainerView : MonoBehaviour , ISwitchable
             for (var y = 0; y < ItemsContainerModel.Size.y; y++)
             {
                 var item = ItemsContainerModel.GetSettedItem(new Vector2Int(x, y));
-                var itemCell = new ItemCell(new Vector2Int(x, y), item);
+                var itemCell = ItemsContainerModel.ItemCells[x,y];
 
                 var cellView = ItemCellViews[x, y] = Instantiate(_itemCellViewPrefab, _itemsContainerLayout.transform);
-                cellView.Initialize(itemCell);
+                cellView.Initialize(itemCell, _itemsViewFactory);
                 _contentToSwitch.Add(cellView);
                 _itemsContainerLayout.SetElement(cellView.RectTransform, new Vector2Int(x, y));
             }

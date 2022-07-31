@@ -7,9 +7,14 @@ using Enums;
 public class WallBuilding : BuildingWithChilds
 {
     public override int Weight => 30;
-    protected override BuildingStats BuildingStats { get; } = new(){ Health = 100 };
+    protected override BuildingStats BuildingStats { get; } = new()
+    {
+        Health = 100,
+        DropItems = new List<CountableItem>() { new (ItemType.Wood, 2) }
+    };
     public override TargetType TargetType => TargetType.Tower;
     public override BuildingType BuildingType => BuildingType.Wall;
+    public override DamagableType DamagableType => DamagableType.Stone;
     protected override Direction2 Direction { get; set; } = Direction2.Foward;
 
 

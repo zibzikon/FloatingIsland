@@ -9,5 +9,7 @@ public class TowerBuilding : BuildingWithChilds
     };
     public override TargetType TargetType => TargetType.Tower;
     public override BuildingType BuildingType => BuildingType.Tower;
+    public override DamagableType DamagableType => DamagableType.Stone;
+
     protected override Direction2 Direction { get; set; }
 }

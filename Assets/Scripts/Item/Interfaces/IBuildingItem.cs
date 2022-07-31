@@ -1,4 +1,4 @@
 public interface IBuildingItem
 {
-    public void Build(IBuilder builder);
+    public bool TryBuild(IBuilder builder);
 }

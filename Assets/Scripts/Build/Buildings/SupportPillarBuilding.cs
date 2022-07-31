@@ -7,12 +7,16 @@ public class SupportPillarBuilding : BuildingWithChilds
 {
     protected override BuildingStats BuildingStats { get; } = new BuildingStats
     {
-        Health = 100
+        Health = 100,
+        DropItems = new List<CountableItem>() { new (ItemType.Wood, 1) }
     };
+    
     public override TargetType TargetType => TargetType.Tower;
     public override int Weight => 20;
     public override BuildingType BuildingType => BuildingType.SupportPillar;
     protected override Direction2 Direction { get; set; } = Direction2.Foward;
+    
+    public override DamagableType DamagableType => DamagableType.Wooden;
     
     public override void AddChildBuilding(Building building, Direction3 direction)
     {

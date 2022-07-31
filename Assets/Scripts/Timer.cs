@@ -1,11 +1,11 @@
 using UnityEngine;
 
-public struct Timer : IUpdatable
+public class Timer : IUpdatable
 {
     private float _time;
 
     private bool _timerStarted;
-    public bool TimeIsOut { get; private set; }
+    public bool TimeIsOut { get; private set; } = true;
     
     public void Start(float time)
     {

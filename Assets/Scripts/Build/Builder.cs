@@ -6,9 +6,12 @@ using UnityEngine.InputSystem;
 
 sealed class Builder : IUpdatable, IBuilder
 {
-    private BuilderBehaviour _builderBehaviour;
+    private readonly BuilderBehaviour _builderBehaviour;
 
-    private PlayerInput _input;
+    private readonly PlayerInput _input;
+
+    public bool IsBuilding => _builderBehaviour.IsBuilding;
+    public bool BuildingEndedOnThisFrame => _builderBehaviour.BuildingEndedOnThisFrame;
     
     public Builder(BuilderBehaviour builderBehaviour, PlayerInput input)
     {
@@ -53,7 +56,7 @@ sealed class Builder : IUpdatable, IBuilder
         _builderBehaviour.SpawnBuilding(BuildingType.Tower);
     
     private void AddTurret(InputAction.CallbackContext context) =>
-        _builderBehaviour.SpawnBuilding(BuildingType.Turret);
+        _builderBehaviour.SpawnBuilding(BuildingType.WoodenCrafter);
     
     private void AddSupportPillar(InputAction.CallbackContext context) =>
         _builderBehaviour.SpawnBuilding(BuildingType.SupportPillar);

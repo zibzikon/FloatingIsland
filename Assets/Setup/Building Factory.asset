@@ -20,3 +20,5 @@ MonoBehaviour:
     type: 3}
   _turretPrefab: {fileID: 2760308845185076432, guid: 7961dea2cfa72e344a9d9c072e526c9c,
     type: 3}
+  _woodenCrafterPrefab: {fileID: 685482681973119875, guid: 484361a971961f5498c6c1c2270ce588,
+    type: 3}

@@ -1,9 +1,12 @@
 using System.Collections.Generic;
+using Enums;
 using UnityEngine;
 
 public class OakSapling : Plant
 {
     public override int Weight { get; }
+    public override DamagableType DamagableType => DamagableType.Wooden;
+
     protected override PlantStats PlantStats { get; } = new()
     {
         Health = 20,

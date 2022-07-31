@@ -5,9 +5,11 @@ using Enums;
 using Extentions;
 using UnityEngine;
 
-public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecyclable, ITarget, IDestroyable
+public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecyclable, ITarget, ISelectable
 {
     protected int Health;
+
+    [SerializeField] private ItemsDroppingFactory _itemsDroppingFactory;
     
     [SerializeField] private DirectionRotation _directionRotation;
 
@@ -32,7 +34,6 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
     public event Action Damaged;
 
     public Transform Transform => transform;
-    
 
     [SerializeField] private List<OccupyingCell> _occupyingCells;
 
@@ -45,6 +46,8 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
     public abstract TargetType TargetType { get; }
     
     public abstract BuildingType BuildingType { get; }
+    
+    public abstract DamagableType DamagableType { get; }
 
     protected BuildPoint ParentBuildPoint { get; set; }
     
@@ -55,6 +58,7 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
     private static readonly IEnumerable<BuildingType> _buildingTypesCanBeSettedOnGameField = new[]
     {
         BuildingType.SupportPillar,
+        BuildingType.WoodenCrafter,
         BuildingType.Tower,
     };
 
@@ -146,7 +150,7 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
         PositionOnGameField = position;
     }
     
-    public void Damage(int count)
+    public void TakeDamage(int count)
     {
         var newBuildingStats = BuildingStats;
         Health -= count;
@@ -165,6 +169,8 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
         ParentBuildPoint?.Reset();
         IsDestroyed = true;
         Destroyed?.Invoke(this);
+        
+        BuildingStats.DropItems.ForEach(itemType => _itemsDroppingFactory.Get(itemType, transform.position));
         if(gameObject != null)
             Destroy(gameObject);
     }
@@ -177,5 +183,15 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
         neighbourList.Add(neighbour);
 
         Neighbors[direction] = neighbourList;
+    }
+
+    public void Select()
+    {
+        
+    }
+
+    public void Deselect()
+    {
+        
     }
 }

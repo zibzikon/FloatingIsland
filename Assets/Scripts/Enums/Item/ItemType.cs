@@ -5,13 +5,13 @@ namespace Enums
         None,
         
         
-        
-        
-        
-        
-        
+        Wood,
+
+
+        WoodenAxe,
+
         //Buildings
-        GeneralPillarBuilding,
-        WalBuilding
+        SupportPillarBuilding,
+        WallBuilding
     }
 }

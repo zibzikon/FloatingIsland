@@ -4,9 +4,11 @@ using Enums;
 using Interfaces;
 using UnityEngine;
 
-public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
+public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget, ISelectable
 {
     public event Action PositionChanged;
+
+    public DamagableType DamagableType => DamagableType.Entity;
 
     public TargetType TargetType => TargetType.Enemy;
     
@@ -42,7 +44,7 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
     {
         TargetContainer = targetContainer;
         InitializeEnemyStats();
-        InitializeBahaviours();
+        InitializeBehaviours();
         
         ContentToUpdate.Add(AtackBehaviour);
         ContentToUpdate.Add(MovingBehaviour);
@@ -50,7 +52,7 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
 
     protected abstract void InitializeEnemyStats();
     
-    public virtual void Damage(int count)
+    public virtual void TakeDamage(int count)
     {
         EnemyStats.Health -= count;
         Damaged?.Invoke();
@@ -60,12 +62,16 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
         }
     }
 
-    protected abstract void InitializeBahaviours();
+    protected abstract void InitializeBehaviours();
 
-
+    protected virtual void ResetBehaviours()
+    {
+        MovingBehaviour.Reset();
+    }
     public virtual void Destroy()
     {
         IsDestroyed = true;
+        ResetBehaviours();
         Destroyed?.Invoke(this);
         if (gameObject != null)
             Destroy(gameObject);
@@ -73,8 +79,12 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
 
     public virtual void OnUpdate()
     {
+        if (IsDestroyed) throw new InvalidCastException("Enemy cannot be updated after destroying");
+
         if (IsPaused) return;
         
+        if (MovingBehaviour.IsMoving) PositionChanged?.Invoke();
+
         ContentToUpdate.ForEach(updatable => updatable.OnUpdate());
         
         if (CurrentTarget == null || CurrentTarget.IsDestroyed)
@@ -116,5 +126,14 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
         IsPaused = false;
     }
 
+    public void Select()
+    {
+        
+    }
+
+    public void Deselect()
+    {
+        
+    }
 }
 

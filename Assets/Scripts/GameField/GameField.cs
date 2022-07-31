@@ -9,7 +9,7 @@ public class GameField : MonoBehaviour, IBuildingsContainer
 {
 
     private Cell[,,] _cells;
-    public readonly Vector3Int Size = new(6, 4, 6);
+    public readonly Vector3Int Size = new(12, 4, 12);
     [SerializeField] private GameFieldCellView _cellViewPrefab;
     [SerializeField] private Transform _debugObjectTransform;
 

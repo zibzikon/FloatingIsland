@@ -4,6 +4,7 @@
     SupportPillar,
     Wall,
     Tower,
-    Turret
+    Turret,
+    WoodenCrafter
 }
 

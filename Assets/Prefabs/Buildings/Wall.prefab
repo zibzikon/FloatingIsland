@@ -171,11 +171,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 133b7cf3608449c4b39ea200dcf96d6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _itemsDroppingFactory: {fileID: 11400000, guid: 1a288251bd01c58429e76a471d9a5862,
+    type: 2}
   _directionRotation:
     _right: {x: -90, y: -90, z: 0}
     _left: {x: -90, y: -90, z: 0}
     _forward: {x: -90, y: 0, z: 0}
     _back: {x: -90, y: -180, z: 0}
+    _up: {x: 0, y: 0, z: 0}
+    _down: {x: 0, y: 0, z: 0}
+  _size: {x: 0, y: 0, z: 0}
+  _centerPosition: {x: 0, y: 0, z: 0}
   _occupyingCells:
   - _position: {x: 0, y: 0, z: 0}
     _right: 1
