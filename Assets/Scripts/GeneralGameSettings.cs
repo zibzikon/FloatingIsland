@@ -15,4 +15,8 @@ public static class GeneralGameSettings
     {
         public const int WorldPositionMultiplier = 2;
     }
+    public static class Tilemap
+    {
+        public static readonly Vector2 TileSize = new (1, 0.5f);
+    }
 }

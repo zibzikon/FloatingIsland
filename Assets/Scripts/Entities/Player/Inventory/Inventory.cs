@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Inventory : ItemsContainer
 {
-    public override Vector2Int Size => new Vector2Int(4,5);
+    public override Vector2Int Size => new(4,5);
 
     private IBuilder _builder;
     
@@ -11,10 +11,6 @@ public class Inventory : ItemsContainer
     public Inventory(IBuilder builder)
     {
         Initialize();
-        SetItemAndReturnSetted(new WallBuildingItem(), new Vector2Int(0, 0));
-        SetItemAndReturnSetted(new WallBuildingItem(), new Vector2Int(0, 1));
-        SetItemAndReturnSetted(new WallBuildingItem(), new Vector2Int(0, 2));
-        SetItemAndReturnSetted(new WallBuildingItem(), new Vector2Int(2, 2));
         _builder = builder;
 
         foreach (var itemCell in ItemCells)

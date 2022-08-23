@@ -1,4 +1,5 @@
 using System;
+using Extentions;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,13 +12,10 @@ public class GridLayout : MonoBehaviour
 
     private RectTransform[,] _elements;
 
-    private void Awake()
-    {
-        _rectTransform = GetComponent<RectTransform>();
-    }
-
     public void Initialize(Vector2Int size)
     {
+        _rectTransform = GetComponent<RectTransform>();
+        //_rectTransform.pivot = new Vector2(0, 0);
         Columns = size.x;
         Rows = size.y;
         
@@ -28,7 +26,7 @@ public class GridLayout : MonoBehaviour
     {
         _elements[position.x, position.y] = layoutElement;
         
-        CorrectElementsPositions();
+        CorrectElementPosition(layoutElement, position);
     }
 
     private void CorrectElementsPositions()
@@ -38,8 +36,6 @@ public class GridLayout : MonoBehaviour
             _rectTransform = GetComponent<RectTransform>();
         }
         
-        var localScale = _rectTransform.sizeDelta;
-        
         for (var x = 0; x < Columns; x++)
         {
             for (var y = 0; y < Rows; y++)
@@ -47,16 +43,24 @@ public class GridLayout : MonoBehaviour
                 var element = _elements[x, y];
 
                 if (element == null) continue;
-                
-                var correctElementScale = new Vector3(localScale.x / Columns, localScale.y / Rows);
 
-                element.sizeDelta = correctElementScale;
-                
-                var position = new Vector2( (correctElementScale.x * x) - localScale.x / 2+ correctElementScale.x / 2,
-                    (correctElementScale.y  * y) - localScale.y /2 + correctElementScale.y /2);
-                
-                element.localPosition = position;
+                CorrectElementPosition(element, new Vector2Int(x, y));
             }
         }
+    }
+
+    private void CorrectElementPosition(RectTransform element, Vector2Int position)
+    {
+        element.pivot = new Vector2(0, 0);
+        
+        var localScale = _rectTransform.sizeDelta;
+
+        var correctElementScale = new Vector3(localScale.x / Columns, localScale.y / Rows);
+
+        var correctPosition = new Vector2(correctElementScale.x * position.x,
+            correctElementScale.y * position.y);
+        element.localPosition = correctPosition;
+
+        element.sizeDelta = correctElementScale;
     }
 }

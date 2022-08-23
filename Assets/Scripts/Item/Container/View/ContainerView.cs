@@ -10,7 +10,7 @@ public abstract class ContainerView : MonoBehaviour , ISwitchable
   
     [SerializeField] private ItemCellView _itemCellViewPrefab;
 
-    [SerializeField] private ItemsViewFactory _itemsViewFactory;
+    [SerializeField] private ItemsSpriteFactory _itemsSpriteFactory;
     protected abstract ItemsContainer ItemsContainerModel { get; }
 
     protected ItemCellView[,] ItemCellViews;
@@ -40,7 +40,6 @@ public abstract class ContainerView : MonoBehaviour , ISwitchable
 
     private void GenerateContainer()
     {
-
         for (var x = 0; x < ItemsContainerModel.Size.x; x++)
         {
             for (var y = 0; y < ItemsContainerModel.Size.y; y++)
@@ -49,7 +48,7 @@ public abstract class ContainerView : MonoBehaviour , ISwitchable
                 var itemCell = ItemsContainerModel.ItemCells[x,y];
 
                 var cellView = ItemCellViews[x, y] = Instantiate(_itemCellViewPrefab, _itemsContainerLayout.transform);
-                cellView.Initialize(itemCell, _itemsViewFactory);
+                cellView.Initialize(itemCell, _itemsSpriteFactory);
                 _contentToSwitch.Add(cellView);
                 _itemsContainerLayout.SetElement(cellView.RectTransform, new Vector2Int(x, y));
             }

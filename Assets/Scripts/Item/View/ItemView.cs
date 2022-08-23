@@ -6,7 +6,6 @@ using UnityEngine.UI;
 
 public class ItemView : MonoBehaviour , ISwitchable
 {
-    [SerializeField] private TextMeshProUGUI _itemsCountText;
     [SerializeField] private Image _itemImage;
     private Item _itemModel;
 
@@ -14,14 +13,19 @@ public class ItemView : MonoBehaviour , ISwitchable
     {
         _itemModel = itemModel;
         _itemImage.sprite = sprite;
-        
     }
     
     public void Enable()
     {
+        gameObject.SetActive(true);
     }
 
     public void Disable()
+    {
+       gameObject.SetActive(false);
+    }
+
+    private void UpdateView()
     {
     }
 }

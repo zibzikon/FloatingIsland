@@ -7,9 +7,12 @@ public class ItemCell
     public readonly Vector2Int Position;
 
     public event Action<ItemCell> ContentChanged;
+    
+    
     public Item Item { get; private set; } = new DefaultItem();
 
-    private int FreeSpace;
+    private int _freeSpace;
+    
     public int ItemsCount { get; private set; }
     
     public ItemCell(Vector2Int position)
@@ -20,6 +23,7 @@ public class ItemCell
     public void SetCellItem(Item item)
     {
         Item = item;
+        _freeSpace = item.ItemStackCount;
         ContentChanged?.Invoke(this);
     }
 
@@ -33,27 +37,34 @@ public class ItemCell
             Clear();
         }
 
+        ContentChanged?.Invoke(this);
         return excess;
     }
 
     public void Clear()
     {
-        
+        ContentChanged?.Invoke(this);
+        Item = new DefaultItem();
+        _freeSpace = 0;
+        ItemsCount = 0;
     }
     
-    public int AddItemAndReturnNonSetted(int count)
+    public int AddItemAndReturnExcess(int count)
     {
         var settableItemsCount = count;
         var nonSettedItemsCount = count;
-        if (FreeSpace < count)
+        if (_freeSpace < count)
         {
-            nonSettedItemsCount -= FreeSpace;
-            settableItemsCount = FreeSpace;
+            nonSettedItemsCount -= _freeSpace;
+            settableItemsCount = _freeSpace;
         }
         
-        ItemsCount = settableItemsCount;
-        FreeSpace -= settableItemsCount;
+        ItemsCount += settableItemsCount;
+        nonSettedItemsCount -= settableItemsCount;
+        _freeSpace -= settableItemsCount;
         
+        ContentChanged?.Invoke(this);
+
         return nonSettedItemsCount;
     }
 }

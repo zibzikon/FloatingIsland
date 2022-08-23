@@ -2,27 +2,36 @@ using System;
 using Enums;
 using Factories.Item.View;
 using Interfaces;
+using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(RectTransform))]
-public class ItemCellView : Button, ISwitchable
-{ 
-    private ItemsViewFactory _itemsViewFactory;
+public class ItemCellView : MonoBehaviour, ISwitchable
+{
+    public UnityEvent OnClick { get; } = new ();
+    
+    [SerializeField] private TextMeshProUGUI _countText;
+
+    [SerializeField] private ItemView _itemView;
+
+    [SerializeField] private Button _button;
+    
+    private ItemsSpriteFactory _itemsSpriteFactory;
     public RectTransform RectTransform { get; private set;} 
     public ItemCell ItemCellModel { get; private set; }
 
-    private void Awake()
+    public void Initialize(ItemCell itemCellModel, ItemsSpriteFactory itemsSpriteFactory)
     {
         RectTransform = GetComponent<RectTransform>();
-        onClick.AddListener(OnButtonClick);
-    }
-
-    public void Initialize(ItemCell itemCellModel, ItemsViewFactory itemsViewFactory)
-    {
+        _button.onClick.AddListener(()=> OnClick.Invoke());
+        OnClick.AddListener(OnButtonClick);
+        
         ItemCellModel = itemCellModel;
 
-        _itemsViewFactory = itemsViewFactory;
+        _itemsSpriteFactory = itemsSpriteFactory;
         
         itemCellModel.ContentChanged += OnItemCellContentChanged;
         
@@ -36,23 +45,19 @@ public class ItemCellView : Button, ISwitchable
         ItemCellModel.Item.Select();
     }
     
-    protected override void OnEnable()
+    protected  void OnEnable()
     {
-        base.OnEnable();
-        
         if(ItemCellModel == null) return;
         ItemCellModel.ContentChanged += OnItemCellContentChanged;
-        onClick.AddListener(OnButtonClick);
+        OnClick.AddListener(OnButtonClick);
         UpdateView();
     }
 
-    protected override void OnDisable()
+    protected  void OnDisable()
     {
-        base.OnDisable();
-        
         if(ItemCellModel == null) return;
         ItemCellModel.ContentChanged -= OnItemCellContentChanged;
-        onClick.RemoveListener(OnButtonClick);
+        OnClick.RemoveListener(OnButtonClick);
     }
 
     private void OnItemCellContentChanged(ItemCell obj)
@@ -63,12 +68,21 @@ public class ItemCellView : Button, ISwitchable
     private void UpdateView()
     { 
         var content = ItemCellModel.Item;
+
+        if (content.ItemType == ItemType.None)
+        {
+            _itemView.Disable();
+            _countText.enabled = false;
+            return;
+        }
         
-        if (content.ItemType == ItemType.None) return;
+        _itemView.Enable();
         
-        var itemView = _itemsViewFactory.Get(content, transform);
-       
-        itemView.transform.position = transform.position;
+        _countText.enabled = true;
+
+        _itemView.Initialize(ItemCellModel.Item, _itemsSpriteFactory.Get(content.ItemType));
+        
+        _countText.text = ItemCellModel.ItemsCount.ToString();
     }
 
     public void Enable()

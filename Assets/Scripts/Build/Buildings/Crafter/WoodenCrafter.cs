@@ -8,8 +8,8 @@ public class WoodenCrafter : Crafter
 
     protected override List<CraftItem> AllCraftItems { get; } = new()
     {
-        new (new CountableItem(ItemType.Wood, 2),
-        new List<CountableItem> { new(ItemType.Wood, 4),new (ItemType.Wood ,2) }) ,
+        new (new CountableItem(ItemType.Wood, 24),
+        new List<CountableItem> { new(ItemType.Wood, 1) }) ,
         
     };
     

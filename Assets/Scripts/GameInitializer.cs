@@ -43,6 +43,8 @@ public class GameInitializer : MonoBehaviour, IUpdatable
         _playerUI.Initialize(_player);
         _contentToUpdate.Add(_playerUI);
         
+        
+        _enemyFactory.Initialize();
         _enemySpawner = new EnemySpawner(_gameField, _enemyFactory, _enemiesWavesContainer, _player);
         _enemySpawner.Initialize();
         _contentToUpdate.Add(_enemySpawner);

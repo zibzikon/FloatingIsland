@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Enums;
 using Factories.Item;
@@ -23,7 +24,7 @@ public abstract class ItemsContainer
     
     public ItemCell[,] ItemCells { get; private set; }
     
-    private readonly List<CountableItem> _allItems = new ();
+    private readonly CountableItemsList _allItems = new ();
 
     public ContainerState CurrentState { get; private set; }
     
@@ -42,15 +43,7 @@ public abstract class ItemsContainer
 
     public bool ContainsItem(ItemType itemType, int itemsCount)
     {
-        foreach (var item in _allItems)
-        {
-            if (item.ItemType == itemType && item.ItemsCount >= itemsCount)
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return _allItems.Contains(itemType, itemsCount);
     }
     
     public void Open()
@@ -74,7 +67,7 @@ public abstract class ItemsContainer
     public int CreateAndAddItemsToContainerAndReturnNotEstablished(ItemType itemType, int count)
     {
         var item = _itemsFactory.Get(itemType);
-        var notEstablishedItemsCount = AddItemsToContainerAndReturnNotEstablished(item, count);
+        var notEstablishedItemsCount = AddItemsToContainerAndReturnExcess(item, count);
         return notEstablishedItemsCount;
     }
 
@@ -82,16 +75,16 @@ public abstract class ItemsContainer
     {
         var excess = count;
         var possibleCellsToRemoveItems = new List<ItemCell>();
+            
         foreach (var itemCell in ItemCells)
         {
-            if (itemCell.Item.ItemType == itemType)
+            if (itemCell.Item.ItemType != itemType) continue;
+            
+            excess -= itemCell.ItemsCount;
+            possibleCellsToRemoveItems.Add(itemCell);
+            if (excess <= 0)
             {
-                excess -= itemCell.ItemsCount;
-                possibleCellsToRemoveItems.Add(itemCell);
-                if (excess <= 0)
-                {
-                    break;
-                }
+                break;
             }
         }
 
@@ -100,16 +93,19 @@ public abstract class ItemsContainer
             var itemsCountToSet = count;
             foreach (var itemCell in possibleCellsToRemoveItems)
             {
-                itemsCountToSet = itemCell.RemoveItemsAndReturnExcess(itemsCountToSet);
+                 excess = itemCell.RemoveItemsAndReturnExcess(itemsCountToSet);
+                _allItems.Remove(itemCell.Item.ItemType, itemsCountToSet - excess);
             }
+
+            return true;
         }
 
         return false;
     }
     
-    private int AddItemsToContainerAndReturnNotEstablished(Item item, int count)
+    private int AddItemsToContainerAndReturnExcess(Item item, int count)
     {
-        var notEstablishedItemsCount = count;
+        var itemsExcess = count;
         var freeItemCells  = new List<ItemCell>();
 
         foreach ( var itemCell in ItemCells)
@@ -117,7 +113,8 @@ public abstract class ItemsContainer
             var itemCellItemType = itemCell.Item.ItemType;
             if (itemCellItemType == item.ItemType)
             {
-                notEstablishedItemsCount = itemCell.AddItemAndReturnNonSetted(count);
+                itemsExcess = itemCell.AddItemAndReturnExcess(count);
+                _allItems.Add(itemCellItemType, count - itemsExcess);
             }
             if (itemCellItemType == ItemType.None)
             {
@@ -127,26 +124,29 @@ public abstract class ItemsContainer
 
         foreach (var freeItemCell in freeItemCells)
         {
-            if (notEstablishedItemsCount > 0)
+            if (itemsExcess > 0)
             {
                 freeItemCell.SetCellItem(item);
-                notEstablishedItemsCount = freeItemCell.AddItemAndReturnNonSetted(notEstablishedItemsCount);
+                count = itemsExcess;
+                itemsExcess = freeItemCell.AddItemAndReturnExcess(itemsExcess);
+                _allItems.Add(freeItemCell.Item.ItemType, count - itemsExcess);
             }
         }
         
-        return notEstablishedItemsCount;
+        return itemsExcess;
     }
     
     public Item SetItemAndReturnSetted(Item item ,Vector2Int position)
     {
          if (position.x >= Size.x || position.y >= Size.y || 
              position.x < 0 || position.y < 0) throw new IndexOutOfRangeException();
-        
+
          var cell = ItemCells[position.x, position.y];
+         var cellItem = cell.Item;
         
          cell.SetCellItem(item);
         
-         return cell.Item;
+         return cellItem;
     }
     
     
@@ -154,4 +154,56 @@ public abstract class ItemsContainer
     {
         return ItemCells[position.x, position.y].Item;
     }
+}
+
+public class CountableItemsList
+{
+    private Dictionary<ItemType, int> _countableItems;
+
+    public CountableItemsList()
+    {
+        InitializeCountableItemsDictionary();
+    }
+
+    private void InitializeCountableItemsDictionary()
+    {
+        _countableItems = new();
+        foreach (var itemType in Enum.GetValues(typeof(ItemType)))
+        {
+            _countableItems.Add((ItemType)itemType, 0);
+        }
+    }
+    
+    public void Add(ItemType item, int count)
+    {
+        _countableItems[item] += count;
+    }
+
+    public bool Contains(ItemType itemType, int count)
+    {
+        return _countableItems[itemType] >= count;
+    }
+    
+    public void Clear()
+    {
+        foreach (var itemType in Enum.GetValues(typeof(ItemType)))
+        {
+            _countableItems[(ItemType)itemType] = 0;
+        }
+    }
+
+    public bool Remove(ItemType item, int count)
+    {
+        var itemsCount = _countableItems[item];
+        
+        if (itemsCount - count < 0)
+        {
+            return false;
+        }
+        
+        _countableItems[item] -= count;
+        return true;
+    }
+
+
 }

@@ -1,34 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Factories.Building
 {
     [CreateAssetMenu(menuName = @"Factories/Building/BuildingFactory")]
     public class BuildingFactory : ScriptableObject
     {
-        [SerializeField]private global::Building _supportPillarPrefab;
-        [SerializeField]private global::Building _wallPrefab;
-        [SerializeField]private global::Building _towerPrefab;
-        [SerializeField]private global::Building _turretPrefab;
-        [SerializeField]private global::Building _woodenCrafterPrefab;
-        
-        public global::Building GetNewBuilding(BuildingType type)
+        [SerializeField] private List<global::Building> _buildings;
+
+        private Dictionary<BuildingType, global::Building> _buildingsDictionary;
+
+        public void Initialize()
         {
-            switch (type)
+            InitializeBuildingDictionary();
+        }
+        
+        private void InitializeBuildingDictionary()
+        {
+            _buildingsDictionary = new();
+            foreach (var building in _buildings)
             {
-                case BuildingType.SupportPillar:
-                    return GetNewBuilding(_supportPillarPrefab);
-                case BuildingType.Wall:
-                    return GetNewBuilding(_wallPrefab);
-                case BuildingType.Tower:
-                    return GetNewBuilding(_towerPrefab);
-                case BuildingType.Turret:
-                    return GetNewBuilding(_turretPrefab);
-                case BuildingType.WoodenCrafter:
-                    return GetNewBuilding(_woodenCrafterPrefab);
+                _buildingsDictionary.Add(building.BuildingType, building);
             }
-            
-            throw new NullReferenceException();
+        }
+
+        public global::Building GetNewBuilding(BuildingType buildingType)
+        {
+            return GetNewBuilding(_buildingsDictionary[buildingType]);
         }
 
         private global::Building GetNewBuilding(global::Building prefab)
@@ -36,7 +36,6 @@ namespace Factories.Building
             var instance = Instantiate(prefab);
             return instance;
         }
-
-    
     }
 }
+

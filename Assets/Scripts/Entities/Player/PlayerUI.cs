@@ -15,6 +15,8 @@ public class PlayerUI : MonoBehaviour, IUpdatable
 
     private static PlayerUI _playerUIInstance;
     public static PlayerUI Instance => _playerUIInstance;
+
+    private bool _anyWindowOpened;
     
     public void Initialize(Player playerModel)
     {
@@ -53,9 +55,14 @@ public class PlayerUI : MonoBehaviour, IUpdatable
      {
          if (Keyboard.current.eKey.wasPressedThisFrame)
          {
+             if (_anyWindowOpened)
+             {
+                 CloseAllWindows();
+             }
+             _anyWindowOpened = true;
              if (_playerModel.TryOpenInventory() == false)
              {
-                 _playerModel.CloseInventory();
+                 CloseAllWindows();
              }
          }
 
@@ -85,9 +92,11 @@ public class PlayerUI : MonoBehaviour, IUpdatable
      
      public void OpenCrafterWindow(ICrafter crafter)
      {
+         CloseAllWindows();
          _crafterUI.Enable();
          GeneralGameSettings.RayCastIsBlocked = true;
          _crafterUI.Initialize(_playerModel.Inventory, crafter);
+         _anyWindowOpened = true;
      }
     
      
@@ -96,6 +105,7 @@ public class PlayerUI : MonoBehaviour, IUpdatable
          CloseCrafterWindow();
          _playerModel.CloseInventory();
          GeneralGameSettings.RayCastIsBlocked = false;
+         _anyWindowOpened = false;
      }
      
      private void CloseCrafterWindow()

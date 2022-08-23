@@ -8,57 +8,16 @@ using UnityEngine;
 public class GameField : MonoBehaviour, IBuildingsContainer
 {
 
-    private Cell[,,] _cells;
+    private Dictionary<Vector3Int, Cell> _cells = new();
     public readonly Vector3Int Size = new(12, 4, 12);
     [SerializeField] private GameFieldCellView _cellViewPrefab;
     [SerializeField] private Transform _debugObjectTransform;
 
     private void Awake()
     {
-        GenerateGameField();
     }
 
-    private void GenerateGameField()
-    {
-        _cells = new Cell[Size.x, Size.y, Size.z];
-        for (var y = 0; y < Size.y; y++)
-        {
-            for (var z = 0; z < Size.z; z++)
-            {
-                for (var x = 0; x < Size.x; x++)
-                {
-                    const int positionMultiplier = GeneralGameSettings.GameFieldSettings.WorldPositionMultiplier;
-                    var currentCell = _cells[x, y, z] = new Cell(new Vector3Int(x, y, z));
-
-                    if (GeneralGameSettings.DebugMode)
-                    {
-                        var cellView = Instantiate(_cellViewPrefab,
-                            new Vector3(x * positionMultiplier, y * positionMultiplier, z * positionMultiplier),
-                            Quaternion.identity, _debugObjectTransform);
-
-                        cellView.Initialize(currentCell);
-
-                    }
-
-                    if (y > 0)
-                    {
-                        Cell.SetUpDownNeighbours(currentCell, _cells[x, y - 1, z]);
-                    }
-
-                    if (z > 0)
-                    {
-                        Cell.SetFowardBackNeighbours(currentCell, _cells[x, y, z - 1]);
-                    }
-
-                    if (x > 0)
-                    {
-                        Cell.SetRightLeftNeighbours(currentCell, _cells[x - 1, y, z]);
-                    }
-                }
-            }
-        }
-    }
-
+  
 
     public bool TrySetBuilding(Building building,  BuildPoint buildPoint)
     {
@@ -147,26 +106,21 @@ public class GameField : MonoBehaviour, IBuildingsContainer
             cells.Add(cell);
             occupyingCells.Add(OccupyingCell.Create(occupyingCellPosition, occupyingCell.SettedNeighbours));
         }
-
-        
         
         foreach (var cell in building.SettedCells.Select(settedCell => GetCellByPosition(settedCell.Position)))
-        {
             cell.RemoveBuilding(building);
-        }
+        
 
         foreach (var cell in cells)
-        {
             cell.SetBuilding(building);
-        }
-
+        
         building.SettedCells = occupyingCells;
         return true;
     }
 
     public Cell GetCellByPosition(Vector3Int position)
     {
-        return _cells[position.x, position.y, position.z];
+        return _cells[position];
     }
 
     public static Vector3Int ConvertWorldToGameFieldPosition(Vector3 position)
@@ -184,7 +138,7 @@ public class GameField : MonoBehaviour, IBuildingsContainer
             {
                 for (var x = 0; x < Size.x; x++)
                 {
-                    _cells[x, y, z].Reset();
+                    _cells[new Vector3Int(x,y,z)]?.Reset();
                 }
             }
         }

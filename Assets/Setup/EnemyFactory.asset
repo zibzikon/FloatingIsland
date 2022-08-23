@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10f20d2c778247d5b1c91d8b0497e401, type: 3}
   m_Name: EnemyFactory
   m_EditorClassIdentifier: 
-  _garry: {fileID: -164834745564074659, guid: b1c75eeaae480604db264dfd20991c51, type: 3}
+  _enemies:
+  - {fileID: -164834745564074659, guid: b1c75eeaae480604db264dfd20991c51, type: 3}

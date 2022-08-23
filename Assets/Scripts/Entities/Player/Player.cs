@@ -14,6 +14,10 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     [SerializeField] private BuildingFactory _buildingFactory;
 
     [SerializeField] private BuildingPointersFactory _buildingPointersFactory;
+
+    [SerializeField] private bool _build;
+    
+    [SerializeField] private BuildingType _buildingType;
     
     protected override EntityStats Stats { get; }
 
@@ -24,7 +28,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     public bool IsDestroyed { get; private set; }
 
     public bool IsPaused { get; private set; }
-    
+
     public event Action PositionChanged;
 
     public event Action<object> Destroyed;
@@ -73,6 +77,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
         _timer = new Timer();
         _contentToUpdate.Add(_timer);
         
+        _buildingFactory.Initialize();
         _builder = new Builder(new BuilderBehaviour(gameField, _buildingFactory, _buildingPointersFactory,
             Camera.main), _input);
         
@@ -101,16 +106,22 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     public void OnUpdate()
     {
         if(IsPaused) return;
-
-        if (_movingBehaviour.IsMoving) PositionChanged?.Invoke();
-
-        CollectDroppedItems();
-        AttackTarget();
         
         foreach (var content in _contentToUpdate)
         {
             content.OnUpdate();
         }
+        
+        if (_build)
+        {
+            _build = false;
+            _builder.Build(_buildingType);
+        }
+        
+        if (_movingBehaviour.IsMoving) PositionChanged?.Invoke();
+
+        CollectDroppedItems();
+        AttackTarget();
     }
     
     
@@ -137,7 +148,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     
     public bool TryOpenInventory()
     {
-        if (_builder.IsBuilding || _builder.BuildingEndedOnThisFrame|| Inventory.CurrentState == ItemsContainer.ContainerState.Opened)
+        if (_builder.IsBuilding || _builder.BuildingEndedOnThisFrame || Inventory.CurrentState == ItemsContainer.ContainerState.Opened)
             return false;
         
         Inventory.Open();

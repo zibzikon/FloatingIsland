@@ -11,7 +11,7 @@ public abstract class Crafter : Building, IInteractable, ICrafter
     public bool TryCraftItem(ItemType itemType, ItemsContainer itemsContainer)
     {
         var craftItem = AllCraftItems.FirstOrDefault(craftItem => craftItem.Item.ItemType == itemType);
-        if (craftItem == null || ValidateCraftingBuilding(craftItem, itemsContainer) == false) return false;
+        if (craftItem == null || ValidateCraftingItem(craftItem, itemsContainer) == false) return false;
         
         foreach (var requireItemsToCraft in craftItem.RequireItemsToCraft)
         {
@@ -26,18 +26,18 @@ public abstract class Crafter : Building, IInteractable, ICrafter
             return true;
     }
     
-    public bool ValidateCraftingBuilding(CraftItem craftItem, ItemsContainer itemsContainer)
+    public bool ValidateCraftingItem(CraftItem craftItem, ItemsContainer itemsContainer)
     {
         return craftItem != null
                && craftItem.RequireItemsToCraft.All(requireItemToCraft =>
                    itemsContainer.ContainsItem(requireItemToCraft.ItemType, requireItemToCraft.ItemsCount));
     }
     
-    public bool ValidateCraftingBuilding(ItemType itemType, ItemsContainer itemsContainer)
+    public bool ValidateCraftingItem(ItemType itemType, ItemsContainer itemsContainer)
     {
         var craftItem = AllCraftItems.FirstOrDefault(craftItem => craftItem.Item.ItemType == itemType);
 
-        return ValidateCraftingBuilding(craftItem, itemsContainer);
+        return ValidateCraftingItem(craftItem, itemsContainer);
     }
 
     private void Open()
