@@ -45,6 +45,8 @@ public class PathFinder
 
             foreach (var cell in newReachableCells)
             {
+                if (cell.IsBlocked) continue;
+                
                 if (exploredCells.Contains(cell)) continue;
 
                 if (!reachableCells.Contains(cell))
@@ -107,7 +109,8 @@ internal class PathFindingField
     
     public void GeneratePathFindingField()
     {
-        var size = _gameField.Size;
+        var size = new Vector3Int();/* new Vector3Int(_gameField.GetGameFieldRanges().Max(x => x.Max.x),
+                _gameField.MaxYSize, _gameField.GetGameFieldRanges().Min(x => x.Min.y));*/
         
         _pathCells = new PathCell[size.x, size.y, size.z];
         for (var y = 0; y < size.y; y++)
@@ -118,6 +121,10 @@ internal class PathFindingField
                 {
                     var currentCell = _pathCells[x, y, z] =
                         new PathCell(_gameField.GetCellByPosition(new Vector3Int(x, y, z)));
+
+                    if (_gameField.PositionEntersInRange(new Vector2Int(x, z)) == false)
+                        currentCell.IsBlocked = true;
+                    
                     
                     if (y > 0)
                     {
@@ -126,7 +133,7 @@ internal class PathFindingField
 
                     if (z > 0)
                     {
-                        PathCell.SetFowardBackNeighbours(currentCell, _pathCells[x, y, z - 1]);
+                        PathCell.SetForwardBackNeighbours(currentCell, _pathCells[x, y, z - 1]);
                     }
 
                     if (x > 0)
@@ -156,6 +163,7 @@ internal class PathCell
     
     private readonly Vector3Int _position;
 
+    public bool IsBlocked { get; set; }
     public PathCell(Cell gameFieldCell)
     {
         _position = gameFieldCell.Position;
@@ -179,7 +187,7 @@ internal class PathCell
         left.Neighbors.Right = right;
     }
     
-    public static void SetFowardBackNeighbours(PathCell foward, PathCell back)
+    public static void SetForwardBackNeighbours(PathCell foward, PathCell back)
     {
         foward.Neighbors.Back = back;
         back.Neighbors.Forward = foward;

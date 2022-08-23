@@ -18,6 +18,20 @@ public static class DirectionExtentions
             Direction3.Back => Vector3.back,
             Direction3.Up => Vector3.up,
             Direction3.Down => Vector3.down,
+            Direction3.Zero => Vector3.zero,
+            _=> throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+        };
+    }
+    
+    public static Vector2Int ToVector2( this Direction2 direction)
+    {
+        return direction switch
+        {
+            Direction2.Right => Vector2Int.right,
+            Direction2.Left => Vector2Int.left,
+            Direction2.Foward => Vector2Int.up,
+            Direction2.Back => Vector2Int.down,
+            Direction2.Zero => Vector2Int.zero,
             _=> throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
         };
     }

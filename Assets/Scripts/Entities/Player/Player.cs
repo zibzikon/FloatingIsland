@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Enums;
-using Factories.Building;
+using Factories.BuildingFactories;
 using Interfaces;
 using Units.Behaviours;
 using UnityEngine;

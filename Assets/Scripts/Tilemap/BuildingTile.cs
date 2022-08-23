@@ -3,7 +3,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-public class Tile : MonoBehaviour
+public class BuildingTile : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
 
@@ -16,8 +16,8 @@ public class Tile : MonoBehaviour
 
     [SerializeField]private bool _correctTile;
 
-    [SerializeField] private BuildingType _tileBuildingType;
-    public BuildingType TileBuildingType => _tileBuildingType;
+    [SerializeField] private BuildingType buildingType;
+    public BuildingType BuildingType => buildingType;
     
     private void OnValidate()
     {

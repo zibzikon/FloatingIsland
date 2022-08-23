@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Factories.Building
+namespace Factories.BuildingFactories
 {
     [CreateAssetMenu(menuName = @"Factories/Building/BuildingPointersFactory")]
     public class BuildingPointersFactory: ScriptableObject

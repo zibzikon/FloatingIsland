@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Extentions;
-using Factories.Building;
+using Factories.BuildingFactories;
 using UnityEngine;
 using UnityEngine.InputSystem;
 

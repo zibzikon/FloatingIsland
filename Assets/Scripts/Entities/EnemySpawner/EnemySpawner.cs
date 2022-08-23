@@ -4,7 +4,7 @@ using System.Linq;
 using Entities.EnemySpawner;
 using Enums;
 using Extentions;
-using Factories.Enemy;
+using Factories.EnemyFactories;
 using UnityEngine;
 
 public class EnemySpawner : ITargetContainer, IUpdatable
@@ -55,15 +55,12 @@ public class EnemySpawner : ITargetContainer, IUpdatable
         {
             var currentCell = reachableCells.Pop();
             exploredCells.Add(currentCell);
-            
-            var cellSettedBuildings = currentCell.SettedBuildings;
-
-            var settedBuildings = cellSettedBuildings as Building[] ?? cellSettedBuildings.ToArray();
-            if (settedBuildings.Any())
+            var placedBuilding = currentCell.PlacedBuilding;
+            if (currentCell.IsBlocked)
             {
-                if (settedBuildings.FirstOrDefault(building => 
-                        building.TargetType == preferredTargetType) != null)
-                     return GetBlockingTarget(startCell.Position, currentCell.Position);
+                if(placedBuilding.TargetType == preferredTargetType) 
+                    return GetBlockingTarget(startCell.Position, currentCell.Position);
+                
                 closestCellWithTarget ??= currentCell;
             }
 
@@ -85,7 +82,7 @@ public class EnemySpawner : ITargetContainer, IUpdatable
             closestCellWithTarget.Position) :null;
         var playerCell = _gameField.GetCellByPosition(GameField.ConvertWorldToGameFieldPosition(_player.Transform.position));
         
-        return blockingTarget ?? ( closestCellWithTarget?.SettedBuildings.First() ?? _player.IsDestroyed ? null 
+        return blockingTarget ?? ( closestCellWithTarget?.PlacedBuilding ?? _player.IsDestroyed ? null 
             :( GetBlockingTarget(startCell.Position ,playerCell.Position) ?? _player ));
     }
 
@@ -97,11 +94,11 @@ public class EnemySpawner : ITargetContainer, IUpdatable
         {
             if (cell.IsBlocked)
             {
-                return cell.SettedBuildings.FirstOrDefault();
+                return cell.PlacedBuilding;
             }
             cell = path.Pop();
         }
-        return cell.SettedBuildings.FirstOrDefault();
+        return cell.PlacedBuilding;
     }
 
     public void Initialize()

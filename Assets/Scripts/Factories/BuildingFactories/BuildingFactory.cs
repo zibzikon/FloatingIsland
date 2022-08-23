@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Factories.Building
+namespace Factories.BuildingFactories
 {
     [CreateAssetMenu(menuName = @"Factories/Building/BuildingFactory")]
     public class BuildingFactory : ScriptableObject
@@ -31,7 +31,7 @@ namespace Factories.Building
             return GetNewBuilding(_buildingsDictionary[buildingType]);
         }
 
-        private global::Building GetNewBuilding(global::Building prefab)
+        private global::Building GetNewBuilding(Building prefab)
         {
             var instance = Instantiate(prefab);
             return instance;

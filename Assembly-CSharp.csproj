@@ -50,7 +50,7 @@
      <Compile Include="Assets\Scripts\Enums\EnemyType.cs" />
      <Compile Include="Assets\Scripts\CollisionObject.cs" />
      <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SkewTextExample.cs" />
-     <Compile Include="Assets\Scripts\Factories\Enemy\EnemyFactory.cs" />
+     <Compile Include="Assets\Scripts\Factories\EnemyFactories\EnemyFactory.cs" />
      <Compile Include="Assets\Scripts\Timer.cs" />
      <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\SimpleScript.cs" />
      <Compile Include="Assets\Learn\GoF Design patterns\Bridge\Outputs\WordOutput.cs" />
@@ -60,7 +60,7 @@
      <Compile Include="Assets\Scripts\Item\Items\Item.cs" />
      <Compile Include="Assets\Scripts\Extentions\VectorExtentions.cs" />
      <Compile Include="Assets\Scripts\Entities\Enemy\Enemy.cs" />
-     <Compile Include="Assets\Scripts\Factories\Building\BuildingFactory.cs" />
+     <Compile Include="Assets\Scripts\Factories\BuildingFactories\BuildingFactory.cs" />
      <Compile Include="Assets\Scripts\Entities\IMovable.cs" />
      <Compile Include="Assets\Scripts\Extentions\NeighboursExtention.cs" />
      <Compile Include="Assets\Scripts\Build\BuildingStats.cs" />
@@ -94,7 +94,7 @@
      <Compile Include="Assets\Scripts\Build\Buildings\Crafter\View\RequireItemToCraftViewGridLayoutGroup.cs" />
      <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\ChatController.cs" />
      <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\TextMeshProFloatingText.cs" />
-     <Compile Include="Assets\Scripts\Tilemap\Tile.cs" />
+     <Compile Include="Assets\Scripts\Tilemap\BuildingTile.cs" />
      <Compile Include="Assets\Scripts\Test\Debug.cs" />
      <Compile Include="Assets\Scripts\Build\BuildingDesignator.cs" />
      <Compile Include="Assets\Scripts\Entities\EnemySpawner\EnemiesWavesContainer.cs" />
@@ -109,7 +109,7 @@
      <Compile Include="Assets\Scripts\Item\Container\View\GridLayout.cs" />
      <Compile Include="Assets\Scripts\Enums\Item\ItemType.cs" />
      <Compile Include="Assets\Scripts\Enums\CellState.cs" />
-     <Compile Include="Assets\Scripts\Factories\Building\BuildingPointersFactory.cs" />
+     <Compile Include="Assets\Scripts\Factories\BuildingFactories\BuildingPointersFactory.cs" />
      <Compile Include="Assets\Scripts\Item\Items\Instruments\Axe.cs" />
      <Compile Include="Assets\TextMesh Pro\Examples &amp; Extras\Scripts\CameraController.cs" />
      <Compile Include="Assets\Scripts\Interfaces\IPausable.cs" />
@@ -170,6 +170,7 @@
      <Compile Include="Assets\Scripts\Build\Buildings\Crafter\View\CrafterUI.cs" />
      <Compile Include="Assets\Scripts\Item\Items\Instruments\Instrument.cs" />
      <Compile Include="Assets\Scripts\Factories\Item\ItemsDroppingFactory.cs" />
+     <Compile Include="Assets\Scripts\Factories\BuildingFactories\BuildingTilesFactory.cs" />
      <Compile Include="Assets\Scripts\Build\BuildingsColection.cs" />
      <Compile Include="Assets\Scripts\Build\BuildPointer.cs" />
      <Compile Include="Assets\Learn\GoF Design patterns\Bridge\Outputs\XMLOutput.cs" />

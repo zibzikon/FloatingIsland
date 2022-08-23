@@ -6,7 +6,7 @@ namespace Test
     public class Debug : MonoBehaviour
     {
         [SerializeField] private IsometricTilemap2_5D _tilemap;
-        [SerializeField] private Tile _testTilePrefab;
+        [SerializeField] private BuildingTile testBuildingTilePrefab;
 
         [SerializeField] private bool _spawnAndSetTile;
         [SerializeField] private Vector3Int _position;
@@ -15,7 +15,7 @@ namespace Test
         {
             if (!_spawnAndSetTile) return;
             _spawnAndSetTile = false;
-            _tilemap.SetTile(Instantiate(_testTilePrefab), _position);
+            _tilemap.SetTile(Instantiate(testBuildingTilePrefab), _position);
         }
     }
 }

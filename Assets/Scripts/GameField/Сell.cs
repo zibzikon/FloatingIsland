@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Cell
@@ -11,53 +9,41 @@ public class Cell
     
     public readonly Neighbors3<Cell> Neighbours = new();
 
-    private List<Building> _settedBuildings = new();
-    public IEnumerable<Building> SettedBuildings => _settedBuildings;
+    private Building _placedBuilding;
+    public Building PlacedBuilding => _placedBuilding;
     
-    public bool IsFilled { get; private set; }
-
-    public int Capacity { get; private set; } = 100;
-
-    public bool IsBlocked => Capacity <= 60;
+    public bool IsBlocked => PlacedBuilding != null;
     
     public Cell(Vector3Int position)
     {
         Position = position;
     }
 
-    public bool BuildingCanBeSettedOnCell(Building building) =>
-        building.Weight < Capacity && Building.CanBeMergedWithBuildings(building, _settedBuildings);
-    
-    
-    
+    public bool BuildingCanBeSettedOnCell(Building building) => Building.CanBeMergedWithBuildings(building, new []{_placedBuilding} );
+
     public void SetBuilding(Building building)
     {
-        if (building.Weight > Capacity) throw new IndexOutOfRangeException();
-        Capacity -= building.Weight;
         building.Destroyed += OnBuildingDestroyed;
         building.DirectionChanged += OnBuildingDestroyed;
-        _settedBuildings.Add(building);
+        _placedBuilding =building;
         Changed?.Invoke();
     }
     
-    public void RemoveBuilding(Building building)
+    public void RemoveBuilding()
     {
-        building.Destroyed -= OnBuildingDestroyed;
-        building.DirectionChanged -= OnBuildingDestroyed;
-        Capacity += building.Weight;
-        _settedBuildings.Remove(building);
+        Reset();
         Changed?.Invoke();
     }
     
     private void OnBuildingDestroyed(object sender)
     {
-        var building = (Building)sender;
-        RemoveBuilding(building);
+        _placedBuilding = null;
     }
 
     public void Reset()
     {
-        _settedBuildings.ForEach(building => building.Destroyed -= OnBuildingDestroyed);
+        _placedBuilding.Destroyed -= OnBuildingDestroyed;
+        _placedBuilding = null;
     }
     
     public static void SetRightLeftNeighbours(Cell right, Cell left)
@@ -66,7 +52,7 @@ public class Cell
         left.Neighbours.Right = right;
     }
     
-    public static void SetFowardBackNeighbours(Cell foward, Cell back)
+    public static void SetForwardBackNeighbours(Cell foward, Cell back)
     {
         foward.Neighbours.Back = back;
         back.Neighbours.Forward = foward;

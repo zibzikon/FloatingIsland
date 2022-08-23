@@ -6,30 +6,30 @@ using UnityEngine.Tilemaps;
 
 public class IsometricTilemap2_5D : MonoBehaviour
 {
-    private Dictionary<Vector3Int, Tile> _placedTiles = new Dictionary<Vector3Int, Tile>();
-    public void SetTile(Tile tile, Vector3Int position)
+    private Dictionary<Vector3Int, BuildingTile> _placedTiles = new Dictionary<Vector3Int, BuildingTile>();
+    public void SetTile(BuildingTile buildingTile, Vector3Int position)
     {
-        if (_placedTiles.ContainsKey(position)) ReplaceTile(tile, position);
-        else _placedTiles.Add(position, tile);
-        CorrectTilePosition(tile, position);
+        if (_placedTiles.ContainsKey(position)) ReplaceTile(buildingTile, position);
+        else _placedTiles.Add(position, buildingTile);
+        CorrectTilePosition(buildingTile, position);
         
     }
 
-    private BuildingType GetTileBuildingTypeByPosition(Vector3Int position)
+    public BuildingType GetTileBuildingTypeByPosition(Vector3Int position)
     {
-        return _placedTiles.ContainsKey(position) ? _placedTiles[position].TileBuildingType : BuildingType.None;
+        return _placedTiles.ContainsKey(position) ? _placedTiles[position].BuildingType : BuildingType.None;
     }
     
-    private void ReplaceTile(Tile tile, Vector3Int position)
+    private void ReplaceTile(BuildingTile buildingTile, Vector3Int position)
     {
         _placedTiles[position].Destroy();
-        _placedTiles[position] = tile;
+        _placedTiles[position] = buildingTile;
     }
 
-    private void CorrectTilePosition(Tile tile, Vector3Int position)
+    private void CorrectTilePosition(BuildingTile buildingTile, Vector3Int position)
     {
-        tile.SetWorldPosition(GetWorldPositionByIsometricPosition(position));
-        tile.SetTileDepth(CalculateDepth(position));
+        buildingTile.SetWorldPosition(GetWorldPositionByIsometricPosition(position));
+        buildingTile.SetTileDepth(CalculateDepth(position));
     }
 
     private Vector2 GetWorldPositionByIsometricPosition(Vector3Int position)

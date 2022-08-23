@@ -9,16 +9,15 @@ public class GameField : MonoBehaviour, IBuildingsContainer
 {
 
     private Dictionary<Vector3Int, Cell> _cells = new();
-    public readonly Vector3Int Size = new(12, 4, 12);
-    [SerializeField] private GameFieldCellView _cellViewPrefab;
-    [SerializeField] private Transform _debugObjectTransform;
+    
+    private Dictionary<Vector2Int, Range<Vector2Int>> _range = new();
 
-    private void Awake()
-    {
-    }
+    public int MaxYSize { get; private set; } = 10;
+    public IEnumerable<Cell> GetCells()
+        =>_cells.Select(cell => cell.Value);
 
-  
-
+    public IEnumerable<Range<Vector2Int>> GetGameFieldRanges() => _range.Select(x => x.Value);
+    
     public bool TrySetBuilding(Building building,  BuildPoint buildPoint)
     {
         buildPoint.BuildingContainer.SetBuildPointsPositions();
@@ -31,7 +30,7 @@ public class GameField : MonoBehaviour, IBuildingsContainer
         SubscribeBuilding(building);
         building.SetSupportBuilding(buildPoint, buildPoint.Direction);
         building.transform.position = buildPoint.GetBuildPosition(buildPoint.BuildingContainer.WorldPosition);
-        Debug.Log("buildingWasSetted");
+        Debug.Log("buildingWasPlaced");
         return true;
     }
 
@@ -43,13 +42,13 @@ public class GameField : MonoBehaviour, IBuildingsContainer
         building.DirectionChanged += OnBuildingDirectionChanged;
         building.Destroyed += OnBuildingDirectionChanged;
         building.transform.position = startCell.WorldPosition;
-        Debug.Log("buildingWasSetted");
+        Debug.Log("buildingWasPlaced");
         return true;
     }
 
     private void SubscribeBuilding(Building building)
     {
-        building.Destroyed += OnBuildingDied;
+        building.Destroyed += OnBuildingDestroyed;
         building.DirectionChanged += OnBuildingDirectionChanged;
     }
     
@@ -60,12 +59,12 @@ public class GameField : MonoBehaviour, IBuildingsContainer
         TrySetCells(building);
     }
 
-    private void OnBuildingDied(object sender)
+    private void OnBuildingDestroyed(object sender)
     {
         var building = sender as Building;
 
         if (sender is Building == false) throw new InvalidOperationException();
-        building.Destroyed -= OnBuildingDied;
+        building.Destroyed -= OnBuildingDestroyed;
         building.DirectionChanged -= OnBuildingDirectionChanged;
     }
     
@@ -84,31 +83,29 @@ public class GameField : MonoBehaviour, IBuildingsContainer
                 
                 var cellNeighbour = startCell.Neighbours[direction];
 
-                var settedBuildings = cellNeighbour?.SettedBuildings;
-                if (settedBuildings == null|| !settedBuildings.Any()) continue;
-                foreach (var settedBuilding in settedBuildings)
-                {
-                    if (NeighbourIsSetted(building, settedBuilding) ||
-                        NeighbourIsSetted(settedBuilding, building)) continue;
-                    
-                    building.AddNeighbour(settedBuilding, direction);
-                    settedBuilding.AddNeighbour(building, direction.GetOppositeDirection());
-                    
-                    bool NeighbourIsSetted(Building startBuilding, Building possibleNeighbour)=>
-                     startBuilding.Neighbors[direction]?.Contains(possibleNeighbour) ?? false;
-                }
+                var placedBuilding = cellNeighbour?.PlacedBuilding;
+                if (placedBuilding == null) continue;
+
+                if (NeighbourIsPlaced(building, placedBuilding) ||
+                    NeighbourIsPlaced(placedBuilding, building)) continue;
+                
+                building.AddNeighbour(placedBuilding, direction);
+                placedBuilding.AddNeighbour(building, direction.GetOppositeDirection());
+                
+                bool NeighbourIsPlaced(Building startBuilding, Building possibleNeighbour)=> 
+                    startBuilding.Neighbors[direction]?.Contains(possibleNeighbour) ?? false;
+                
             }
             
             var occupyingCellPosition = startCell.Position + occupyingCell.Position;
             var cell = GetCellByPosition(occupyingCellPosition);
-            if (cell.IsFilled || cell.Capacity < building.Weight || 
-                !Building.CanBeMergedWithBuildings(building, cell.SettedBuildings)) return false;
+            if (cell.BuildingCanBeSettedOnCell(building) == false) return false;
             cells.Add(cell);
             occupyingCells.Add(OccupyingCell.Create(occupyingCellPosition, occupyingCell.SettedNeighbours));
         }
         
-        foreach (var cell in building.SettedCells.Select(settedCell => GetCellByPosition(settedCell.Position)))
-            cell.RemoveBuilding(building);
+        foreach (var cell in building.SettedCells.Select(placedCell => GetCellByPosition(placedCell.Position)))
+            cell.RemoveBuilding();
         
 
         foreach (var cell in cells)
@@ -120,9 +117,33 @@ public class GameField : MonoBehaviour, IBuildingsContainer
 
     public Cell GetCellByPosition(Vector3Int position)
     {
+        if (_cells.ContainsKey(position) == false)
+            _cells.Add(position, new Cell(position));
+        
         return _cells[position];
     }
 
+    public bool PositionEntersInRange(Vector2Int position)
+        => _range.ContainsKey(position);
+    
+    public Range<Vector2Int> GetGameFieldRangeByPosition(Vector2Int position)
+    {
+        if (_range.ContainsKey(position) == false) 
+            throw new IndexOutOfRangeException();
+        
+        return _range[position];
+    }
+
+    public void IncreaseGameFieldSize(Vector2Int position, Direction2 direction)
+    {
+        var range = _range[position];
+        if (direction == Direction2.Foward || direction == Direction2.Left)
+            range.Max += direction.ToVector2();
+        else 
+            range.Min += direction.ToVector2();
+
+        _range[position] = range;
+    }
     public static Vector3Int ConvertWorldToGameFieldPosition(Vector3 position)
     {
         var correctPosition =
@@ -132,16 +153,7 @@ public class GameField : MonoBehaviour, IBuildingsContainer
     
     private void OnDisable()
     {
-        for (var y = 0; y < Size.y; y++)
-        {
-            for (var z = 0; z < Size.z; z++)
-            {
-                for (var x = 0; x < Size.x; x++)
-                {
-                    _cells[new Vector3Int(x,y,z)]?.Reset();
-                }
-            }
-        }
+        // ToDo
     }
 
     public bool CellsIsFreeToSet(Building building ,List<OccupyingCell> occupyingCells)
@@ -150,11 +162,16 @@ public class GameField : MonoBehaviour, IBuildingsContainer
         foreach (var occupyingCell in occupyingCells)
         {
             var currentCell = GetCellByPosition(occupyingCell.Position + buildingPosition);
-            if (!currentCell.SettedBuildings.Contains(building) && !currentCell.BuildingCanBeSettedOnCell(building))
+            if (!currentCell.PlacedBuilding.Equals(building) && !currentCell.BuildingCanBeSettedOnCell(building))
                 return false;
         }
 
         return true;
     }
-    
+}
+
+public struct Range<T>
+{
+    public T Max;
+    public T Min;
 }
