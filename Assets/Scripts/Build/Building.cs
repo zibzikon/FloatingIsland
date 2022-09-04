@@ -5,43 +5,29 @@ using Enums;
 using Extentions;
 using UnityEngine;
 
-public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecyclable, ITarget, ISelectable
+public abstract class Building : IUpdatable, IRecyclable, ITarget
 {
-    protected int Health;
-
-    [SerializeField] private ItemsDroppingFactory _itemsDroppingFactory;
+    public abstract int Health { get; protected set; }
     
-    [SerializeField] private DirectionRotation _directionRotation;
-
-    [SerializeField] private Vector3 _size;
-    public Vector3 Size => _size;
+    protected virtual Dictionary<Direction2, Vector3> DirectionRotation { get; }
     
-    [SerializeField] private Vector3 _centerPosition;
-    public Vector3 CenterPosition => _centerPosition;
-    
-    protected IBuildingsContainer BuildingsContainer;
+    protected readonly IBuildingsContainer BuildingsContainer;
 
-    public Neighbors3<IEnumerable<INeighbour>> Neighbors { get; } = new();
+    public Neighbors3<Building> Neighbors { get; } = new();
     
-    public abstract int Weight { get; }
-
     public event Action<object> DirectionChanged; 
 
     public event Action PositionChanged;
     
-    public event Action<object> Destroyed; 
-    
+    public event Action<object> Destroyed;
+
     public event Action Damaged;
 
-    public Transform Transform => transform;
-
-    [SerializeField] private List<OccupyingCell> _occupyingCells;
-
-    public List<OccupyingCell> OccupyingCells => _occupyingCells;
+    public FloatingIslandTransform Transform { get; } = new ();
+    
+    public abstract List<OccupyingCell> OccupyingCells { get; }
     
     public Vector3Int PositionOnGameField { get; private set; }
-    
-    protected abstract BuildingStats BuildingStats { get; }
     
     public abstract TargetType TargetType { get; }
     
@@ -49,7 +35,7 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
     
     public abstract DamagableType DamagableType { get; }
 
-    protected BuildPoint ParentBuildPoint { get; set; }
+    private List<Building> _supportingBuildings;
     
     public bool IsDestroyed { get; private set; }
 
@@ -67,25 +53,26 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
         [BuildingType.SupportPillar] = BuildingType.SupportPillar
     };
 
-    private List<OccupyingCell> _settedCells = new ();
+    private List<OccupyingCell> _occupyingCellsOnGameField = new ();
+    private Transform _transform1;
 
-    public List<OccupyingCell> SettedCells { 
-        get=> _settedCells;
+    public List<OccupyingCell> OccupyingCellsOnGameField { 
+        get=> _occupyingCellsOnGameField;
         set
         {
             if (value.Count != OccupyingCells.Count) throw new IndexOutOfRangeException();
-            _settedCells = value;
+            _occupyingCellsOnGameField = value;
         }
     }
 
-    public virtual void Initialize()
+    protected Building(IBuildingsContainer buildingsContainer)
     {
-        Health = BuildingStats.Health;
+        BuildingsContainer = buildingsContainer;
     }
-   
+    
     public virtual void OnUpdate(){}
     
-    public static bool CanBeSettedOnGameField(Building building)
+    public static bool CanBePlacedOnGameField(Building building)
     {
         return _buildingTypesCanBeSettedOnGameField.Contains(building.BuildingType);
     }
@@ -108,53 +95,31 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
 
         return true;
     }
-    
-    public void SetDirection(Direction3 direction3)
+
+    public void Place(Vector3Int position)
     {
-        Direction2 direction;
-
-        try
-        {
-            direction = direction3.AsDirection2();
-        }
-        catch
-        {
-            direction = Direction;
-        }
-        
-        for (var i = 0; i < OccupyingCells.Count; i++)
-        {
-            var cell = OccupyingCells[i];
-            var newPosition = cell.Position.SetDirection(Direction, direction);
-            OccupyingCells[i] = OccupyingCell.Create(newPosition, new Neighbors3<bool>());
-        }
-
-        transform.rotation = Quaternion.Euler(_directionRotation.GeRotationByDirection(direction.AsDirection3()));
+        PositionOnGameField = position;
+        Transform.Position = position.IsometricToScreenPosition();
+    }
+    
+    public void SetDirection(Direction2 direction)
+    {
         DirectionChanged?.Invoke(this);
         Direction = direction;
     }
 
-    public virtual void SetSupportBuilding(BuildPoint parentBuildPoint, Direction3 settingDirection)
-    {
-        if (ValidateSetSupportBuilding(parentBuildPoint.BuildingContainer) == false) throw new InvalidOperationException();
-        SetDirection(settingDirection);
-        ParentBuildPoint = parentBuildPoint;
-        parentBuildPoint.BuildingContainer.AddChildBuilding(this, settingDirection);
-    }
-
-    
     public abstract bool ValidateSetSupportBuilding(IBuildingContainer supportBuilding);
     
-    public void SetPositionOnGameField(Vector3Int position)
+    public virtual void SetPositionOnGameField(Vector3Int position)
     {
         PositionOnGameField = position;
     }
     
-    public void TakeDamage(int count)
+    public virtual void TakeDamage(int count)
     {
-        var newBuildingStats = BuildingStats;
-        Health -= count;
         Damaged?.Invoke();
+        Health -= count;
+        
         if (Health > 0) return;
         Destroy();
     }
@@ -166,25 +131,15 @@ public abstract class Building : MonoBehaviour, INeighbour, IUpdatable, IRecycla
     
     public virtual void Destroy()
     {
-        ParentBuildPoint?.Reset();
         IsDestroyed = true;
         Destroyed?.Invoke(this);
-        
-        BuildingStats.DropItems.ForEach(itemType => _itemsDroppingFactory.Get(itemType, transform.position));
-        if(gameObject != null)
-            Destroy(gameObject);
     }
-
-
-    public void AddNeighbour(INeighbour neighbour, Direction3 direction)
+    
+    public void SetNeighbour(Building neighbour, Direction3 direction)
     {
-        var neighbourList = (Neighbors[direction] ?? (Neighbors[direction] = new List<INeighbour>())).ToList();
-        
-        neighbourList.Add(neighbour);
-
-        Neighbors[direction] = neighbourList;
+        Neighbors[direction] = neighbour;
     }
-
+    
     public void Select()
     {
         

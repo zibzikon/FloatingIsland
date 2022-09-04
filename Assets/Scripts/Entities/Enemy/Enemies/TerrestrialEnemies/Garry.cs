@@ -4,36 +4,27 @@ using Units.Behaviours.Diethable;
 using UnityEngine;
 using UnityEngine.AI;
 
-[RequireComponent(typeof(NavMeshAgent))]
 public class Garry : Enemy
 {
     public override EnemyType EnemyType => EnemyType.Garry;
-    
-    private EnemyStats _enemyStats;
-    
-    protected override EnemyStats EnemyStats => _enemyStats;
+    public override int Health { get; protected set; } = 100;
 
-    protected override void InitializeEnemyStats()
-    {
-        _enemyStats = new EnemyStats()
-        {
-            AttackInterval = 2,
-            DamageStrength = 10,
-            PreferredTargetType = TargetType.Tower,
-            MinRequiredDistanceToTarget = 5,
-            Health = 100,
-        };
-    }
-    
+    public override float AttackInterval { get; protected set; } = 4f;
+
+    public override int DamageStrength { get; protected set; } = 5;
+
+    public override TargetType PreferredTargetType { get; protected set; } = TargetType.Tower;
+
+    public override float MinRequiredDistanceToTarget { get; protected set; } = 5f;
+
     protected override void InitializeBehaviours()
     {
-        MovingBehaviour = new TerrestrialEntityMovingBehaviour(GetComponent<NavMeshAgent>(), EnemyStats.MinRequiredDistanceToTarget);
-        AtackBehaviour = new TerrestrialEnemyAttackingBehaviour(MovingBehaviour, EnemyStats);
+       //ToDo
     }
 
     protected override bool TryTrackNearestTarget()
     { 
-        CurrentTarget = TargetContainer.GetClosestTargetOnLayer(transform.position, EnemyStats.PreferredTargetType);
+        CurrentTarget = TargetContainer.GetClosestTargetOnLayer(Transform.Position, PreferredTargetType);
         return CurrentTarget != null;
     }
 }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Extentions
 {
-    public static class NeighboursExtention
+    public static class NeighboursExtensions
     {
         public static IEnumerable<T> ToEnumerable<T>(this Neighbors3<T> neighbors)
         {

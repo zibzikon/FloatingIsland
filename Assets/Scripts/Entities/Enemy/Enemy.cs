@@ -4,15 +4,15 @@ using Enums;
 using Interfaces;
 using UnityEngine;
 
-public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget, ISelectable
+public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget
 {
     public event Action PositionChanged;
 
     public DamagableType DamagableType => DamagableType.Entity;
 
     public TargetType TargetType => TargetType.Enemy;
-    
-    public Transform Transform => transform;
+
+    public FloatingIslandTransform Transform { get; }
     
     public bool IsPaused { get; private set; }
 
@@ -22,9 +22,15 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget, ISel
 
     public abstract EnemyType EnemyType { get; }
     
-    protected abstract EnemyStats EnemyStats { get; }
+    public abstract int Health { get; protected set; }
     
-    protected override EntityStats Stats => EnemyStats;
+    public abstract float AttackInterval { get; protected set; }
+    
+    public abstract int DamageStrength { get; protected set; }
+    
+    public abstract TargetType PreferredTargetType { get; protected set; }
+    
+    public abstract float  MinRequiredDistanceToTarget { get; protected set; }
     
     public event Action Damaged;
     
@@ -39,28 +45,24 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget, ISel
     protected List<IUpdatable> ContentToUpdate = new();
 
     private float _attackInterval;
-    
+    private FloatingIslandTransform _transform1;
+
     public void Initialize(ITargetContainer targetContainer)
     {
         TargetContainer = targetContainer;
-        InitializeEnemyStats();
         InitializeBehaviours();
-        
-        ContentToUpdate.Add(AtackBehaviour);
-        ContentToUpdate.Add(MovingBehaviour);
     }
-
-    protected abstract void InitializeEnemyStats();
     
     public virtual void TakeDamage(int count)
     {
-        EnemyStats.Health -= count;
+        Health -= count;
         Damaged?.Invoke();
-        if (EnemyStats.Health <= 0)
+        if (Health <= 0)
         {
             Destroy();
         }
     }
+
 
     protected abstract void InitializeBehaviours();
 
@@ -73,8 +75,6 @@ public abstract class Enemy : Entity,  IUpdatable, IPausable, IEnemyTarget, ISel
         IsDestroyed = true;
         ResetBehaviours();
         Destroyed?.Invoke(this);
-        if (gameObject != null)
-            Destroy(gameObject);
     }
 
     public virtual void OnUpdate()

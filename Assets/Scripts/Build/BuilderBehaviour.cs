@@ -16,9 +16,9 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     
     private readonly BuildingPointersFactory _buildingPointersFactory;
 
-    private readonly BuildingsColection _setedBuildings = new();
+    private readonly BuildingsColection _placedBuildings = new();
 
-    private bool _currentBuildingIsReadyToSet => CheckBuildingSettingAvialible();
+    private bool _currentBuildingIsReadyToSet => CheckBuildingSettingAvailable();
     
     private Building _currentBuilding;
     private Building _selectedBuilding;
@@ -27,7 +27,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     private List<BuildPointer> _spawnedPointers = new();
     private List<BuildPoint> _correctPoints = new();
     
-    private bool _buildingSettedOnGameField;
+    private bool _buildingIsPlacedOnGameField;
     public bool IsBuilding { get; private set; }
 
     public bool BuildingEndedOnThisFrame { get; private set; }
@@ -47,7 +47,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         {
             BuildingEndedOnThisFrame = false;
         }
-        foreach (var building in _setedBuildings)
+        foreach (var building in _placedBuildings)
         {
             building.OnUpdate();
         }
@@ -55,29 +55,26 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     
     public void SetBuilding()
     {
-        if (_currentBuilding == null) return;
+        if (_currentBuilding == null)
+            throw new NullReferenceException("Current building is null but you tying to access it");
         
         if ( _selectedBuilding == null)
-        {            
-
+        {
             var selectedBuilding= RayCast.TrySelectItem(_mainCamera)?.GetComponent<BuildingWithChilds>();
             if (selectedBuilding != null && selectedBuilding != _currentBuilding)
             {
                 _selectedBuilding = selectedBuilding;
                 OnBuildingSelected();
             }
-            else if(Building.CanBeSettedOnGameField(_currentBuilding))
+            else if(Building.CanBePlacedOnGameField(_currentBuilding))
             {
-                var hit = RayCast.GetRaycastHitByMousePosition(_mainCamera);
-                _currentBuilding.SetPositionOnGameField(_gameField.GetCellByPosition
-                    (GameField.ConvertWorldToGameFieldPosition(hit.point)).Position);
-                if (_gameField.TrySetBuilding(_currentBuilding))
-                    _buildingSettedOnGameField = true;
+                if (_gameField.TrySetBuilding(_currentBuilding, _gameField.ConvertScreenToGameFieldPosition(Mouse.current.position.ReadValue())))
+                    _buildingIsPlacedOnGameField = true;
             }
         }
         else if (_selectedBuilding != null && _selectedBuildPointer == null)
         {
-            _selectedBuildPointer =RayCast.TrySelectItem(_mainCamera)?.GetComponent<BuildPointer>();
+            _selectedBuildPointer = RayCast.TrySelectItem(_mainCamera)?.GetComponent<BuildPointer>();
             if (_selectedBuildPointer != null)
             {
                 OnPointerSelected(_selectedBuildPointer);
@@ -88,8 +85,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     public void SpawnBuilding(BuildingType type)
     {
         if (_currentBuilding != null) return;
-        _currentBuilding = _buildingFactory.GetNewBuilding(type);
-        _currentBuilding.Initialize();
+        _currentBuilding = _buildingFactory.GetNewBuilding(type, _gameField);
         IsBuilding = true;
     }
 
@@ -112,13 +108,11 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         Debug.Log("Building Pointers Was Spawned");
         return buildingPointers;
     }
-
-
     
-    private bool CheckBuildingSettingAvialible()
+    private bool CheckBuildingSettingAvailable()
     {
         return _currentBuilding != null && (_selectedBuilding != null && _selectedBuildPointer != null) 
-               || _buildingSettedOnGameField;
+               || _buildingIsPlacedOnGameField;
     }
     
     private void OnBuildingSelected()
@@ -132,9 +126,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
             Recycle();
             return;
         }
-        _spawnedPointers = 
-            SpawnBuildingPointers((buildingWithChilds.CenterPosition + buildingWithChilds.transform.position) / 2,
-                buildingWithChilds.Size);
+        
         Debug.Log("Building Was Selected");
     }
 
@@ -152,7 +144,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     {
         if (_currentBuildingIsReadyToSet == false)
             return;
-        _setedBuildings.AddBuilding(_currentBuilding);
+        _placedBuildings.AddBuilding(_currentBuilding);
         Reset();
         IsBuilding = false;
         BuildingEndedOnThisFrame = true;
@@ -171,7 +163,7 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
     private void Reset()
     {
         _currentBuilding = null;
-        _buildingSettedOnGameField = false;
+        _buildingIsPlacedOnGameField = false;
         Recycle();
         Debug.Log("Fields Was Reseted");
     }
@@ -182,8 +174,8 @@ public class BuilderBehaviour : IUpdatable, IRecyclable
         _selectedBuildPointer = null;
         IsBuilding = false;
         _spawnedPointers.DestroyObjects();
-        _spawnedPointers.Clear();
-        _correctPoints.Clear();
+        _spawnedPointers = null;
+        _correctPoints = null;
     }
     
 }

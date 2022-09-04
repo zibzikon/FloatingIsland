@@ -36,7 +36,7 @@ public class ItemsDroppingFactory : ScriptableObject
     private void SpawnItemDrop(ItemDrop itemDrop, CountableItem item, Vector3 position)
     {
         var dropInstance = Instantiate(itemDrop, position, Quaternion.Euler
-            (VectorExtentions.GetRandomVector(new Vector3(0,0,0), new Vector3(0,360,0))));
+            (VectorExtensions.GetRandomVector(new Vector3(0,0,0), new Vector3(0,360,0))));
         
         dropInstance.Initialize(item);
     }

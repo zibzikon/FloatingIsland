@@ -5,36 +5,26 @@ using UnityEngine.Serialization;
 
 namespace Factories.BuildingFactories
 {
-    [CreateAssetMenu(menuName = @"Factories/Building/BuildingFactory")]
-    public class BuildingFactory : ScriptableObject
+    public class BuildingFactory 
     {
-        [SerializeField] private List<global::Building> _buildings;
 
-        private Dictionary<BuildingType, global::Building> _buildingsDictionary;
-
-        public void Initialize()
+        public Building GetNewBuilding(BuildingType buildingType, IBuildingsContainer buildingsContainer)
         {
-            InitializeBuildingDictionary();
-        }
-        
-        private void InitializeBuildingDictionary()
-        {
-            _buildingsDictionary = new();
-            foreach (var building in _buildings)
+            switch (buildingType)
             {
-                _buildingsDictionary.Add(building.BuildingType, building);
+                case BuildingType.SupportPillar:
+                    return new SupportPillarBuilding(buildingsContainer);
+                case BuildingType.Wall:
+                    return new WallBuilding(buildingsContainer);
+                case BuildingType.Tower:
+                    return new Turret(buildingsContainer);
+                case BuildingType.Turret:
+                    return new TowerBuilding(buildingsContainer);
+                case BuildingType.WoodenCrafter:
+                    return new WoodenCrafter(buildingsContainer);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(buildingType), buildingType, null);
             }
-        }
-
-        public global::Building GetNewBuilding(BuildingType buildingType)
-        {
-            return GetNewBuilding(_buildingsDictionary[buildingType]);
-        }
-
-        private global::Building GetNewBuilding(Building prefab)
-        {
-            var instance = Instantiate(prefab);
-            return instance;
         }
     }
 }

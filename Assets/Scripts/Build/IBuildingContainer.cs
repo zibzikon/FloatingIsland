@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IBuildingContainer
+public interface IBuildingContainer 
 {
-   public Neighbors3<IEnumerable<INeighbour>> Neighbors { get; } 
+   public Neighbors3<Building> Neighbors { get; } 
 
    public BuildingType BuildingType { get; }
    

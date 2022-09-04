@@ -2,37 +2,46 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Enums;
+using Extentions;
+using UnityEngine;
 
 public class SupportPillarBuilding : BuildingWithChilds
 {
-    protected override BuildingStats BuildingStats { get; } = new BuildingStats
+    public override List<OccupyingCell> OccupyingCells { get; } = new()
     {
-        Health = 100,
-        DropItems = new List<CountableItem>() { new (ItemType.Wood, 1) }
+        new OccupyingCell(new Vector3Int(0, 0, 0),new Neighbors3<bool>(){Up = true}),
+        new OccupyingCell(new Vector3Int(0, 1, 0), new Neighbors3<bool>(){Down = true})
     };
+
     
     public override TargetType TargetType => TargetType.Tower;
-    public override int Weight => 20;
     public override BuildingType BuildingType => BuildingType.SupportPillar;
     protected override Direction2 Direction { get; set; } = Direction2.Foward;
-    
+
+    public override int Health { get; protected set; }
     public override DamagableType DamagableType => DamagableType.Wooden;
     
+    protected override BuildPoints _buildPoints { get; }
+
+    public SupportPillarBuilding(IBuildingsContainer buildingsContainer) : base(buildingsContainer)
+    {
+    }
     public override void AddChildBuilding(Building building, Direction3 direction)
     {
-        if (Neighbors[direction] == null || Neighbors[direction].Contains(building)) return;
+        if (Neighbors[direction] == null || Neighbors[direction] == building) return;
 
             base.AddChildBuilding(building, direction);
         if (building.BuildingType != BuildingType.Wall) return;
         
-        var neighbourSupportPillarBuilding = (BuildingWithChilds)Neighbors[direction].FirstOrDefault(neighbour => 
-            ((BuildingWithChilds)neighbour).BuildingType == BuildingType.SupportPillar);
+        var neighbourBuilding = Neighbors[direction];
             
-        if (neighbourSupportPillarBuilding == null) throw new InvalidOperationException();
+        if (neighbourBuilding is not BuildingWithChilds neighbourSupportPillarBuilding || 
+            neighbourSupportPillarBuilding.BuildingType != BuildingType.Wall) throw new InvalidOperationException();
         
         neighbourSupportPillarBuilding.AddChildBuilding(building, direction.GetOppositeDirection());
     }
-    
+
+
     public override IEnumerable<BuildPoint> GetCorrectBuildPoints(BuildingType buildingType)
     {
         var allCorrectBuildPoints = new List<BuildPoint>();
@@ -43,19 +52,8 @@ public class SupportPillarBuilding : BuildingWithChilds
             allCorrectBuildPoints.AddRange(correctBuildPoints);
         }
 
-        var trueCorrectBuildPoints = new List<BuildPoint>();
-        foreach (var buildPoint in allCorrectBuildPoints)
-        {
-            if (buildPoint == null || !buildPoint.BuildingCanBeSetted(BuildingType.Wall))
-            { 
-                trueCorrectBuildPoints.Add(buildPoint);
-                continue; 
-            }
-            
-            if (WallBuilding.WallCanBeSettedOnSupportPillar(this, buildPoint.Direction)) trueCorrectBuildPoints.Add(buildPoint);
-        }
-        
-        return trueCorrectBuildPoints;
+        return allCorrectBuildPoints;
     }
-    
+
+
 }

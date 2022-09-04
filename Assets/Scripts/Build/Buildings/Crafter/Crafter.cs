@@ -8,6 +8,10 @@ public abstract class Crafter : Building, IInteractable, ICrafter
     protected abstract List<CraftItem> AllCraftItems { get; }
     public IEnumerable<CraftItem> CraftItems => AllCraftItems;
 
+    protected Crafter(IBuildingsContainer buildingsContainer) : base(buildingsContainer)
+    {
+    }
+    
     public bool TryCraftItem(ItemType itemType, ItemsContainer itemsContainer)
     {
         var craftItem = AllCraftItems.FirstOrDefault(craftItem => craftItem.Item.ItemType == itemType);
@@ -49,4 +53,6 @@ public abstract class Crafter : Building, IInteractable, ICrafter
     {
         Open();
     }
+
+
 }

@@ -1,29 +1,57 @@
+using System;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class Timer : IUpdatable
+public struct Timer 
 {
-    private float _time;
+    public enum TimerState
+    {
+        TimeOut,
+        Start,
+        Working,
+        Stop
+    }
+    
+    public TimerState State { get; private set; }
+    
+    public float RemainingTime { get; private set; }
 
-    private bool _timerStarted;
-    public bool TimeIsOut { get; private set; } = true;
+    public event Action TimeOut;
     
     public void Start(float time)
     {
-        _time = time;
-        TimeIsOut = false;
-        _timerStarted = true;
+        RemainingTime = time;
+        Start();
     }
     
-    public void OnUpdate()
+    public async void Start()
     {
-        if (_timerStarted)
+        State = TimerState.Start;
+        
+        await Task.Yield();
+        
+        State = TimerState.Working;
+        RemainingTime -= Time.deltaTime;
+
+        while (State == TimerState.Working)
         {
-            _time -= Time.deltaTime;
-            if (_time <= 0)
-            {
-                _timerStarted = false;
-                TimeIsOut = true;
-            }
+            if (RemainingTime <= 0)
+                Reset();
+            
+            await Task.Yield();
+            RemainingTime -= Time.deltaTime;
         }
+    }
+
+    public void Stop()
+    {
+        State = TimerState.Stop;
+    }
+    
+    public void Reset()
+    {
+        RemainingTime = 0;
+        State = TimerState.TimeOut;
+        TimeOut?.Invoke();
     }
 }

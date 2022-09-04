@@ -3,15 +3,13 @@ using UnityEngine;
 
 namespace Units.Behaviours.Diethable
 {
-    public class TerrestrialEnemyAttackingBehaviour: IAtackable
+    public class TerrestrialEnemyAttackingBehaviour : IAtackable
     {
         private readonly IMovable _movingBehaviour;
         
         private bool _isAtacking;
         
         public bool AttackingStarted { get; private set; }
-
-        private readonly EnemyStats _enemyStats;
 
         private bool _targetWasDied = true;
 
@@ -21,18 +19,22 @@ namespace Units.Behaviours.Diethable
 
         private float _attackingInterval;
         
+        private readonly int _damageStrength;
+
+        private Timer _timer;
         
-        public TerrestrialEnemyAttackingBehaviour(IMovable movingBehaviour, EnemyStats enemyStats)
+        
+        public TerrestrialEnemyAttackingBehaviour(IMovable movingBehaviour, float attackingInterval, int damageStrength)
         {
+            _attackingInterval = attackingInterval;
+            _damageStrength = damageStrength;
             _movingBehaviour = movingBehaviour;
-            _enemyStats = enemyStats;
         }
         
         public void SetAttackingTarget(ITarget target)
         {
             AttackingStarted = true;
             _currentTarget = target;
-            _attackingInterval = _enemyStats.AttackInterval;
             _movingBehaviour.SetTarget(target);
             target.Destroyed += OnTargetDestroyed;
         }
@@ -47,22 +49,14 @@ namespace Units.Behaviours.Diethable
             _currentTarget = null;
         }
 
-        public void OnUpdate()
+        private async void StartAttacking()
         {
-            if (_currentTarget != null && _movingBehaviour.TargetWasReached && _currentTarget.IsDestroyed == false) 
-            {
-                _attackingInterval -= Time.deltaTime;
-                if (_attackingInterval <= 0)
-                {
-                    DamageTarget();
-                    _attackingInterval = _enemyStats.AttackInterval;
-                }
-            }
         }
-
+        
+     
         private void DamageTarget()
         {
-            _currentTarget.TakeDamage(_enemyStats.DamageStrength);
+            _currentTarget.TakeDamage(_damageStrength);
         }
     }
 }

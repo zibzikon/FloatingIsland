@@ -1,23 +1,21 @@
 using System.Collections.Generic;
 using Enums;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 
 public class OakSapling : Plant
 {
-    public override int Weight { get; }
+    public override int Health { get; protected set; }
     public override DamagableType DamagableType => DamagableType.Wooden;
 
-    protected override PlantStats PlantStats { get; } = new()
-    {
-        Health = 20,
-        MaxGrowState = 2,
-        TimeToGrow = 5
-    };
-    public override BuildingType BuildingType { get; }
+    protected override Dictionary<Direction2, Vector3> DirectionRotation { get; }
 
-    protected override void OnGrow()
-    {
-        
-    }
+    public override List<OccupyingCell> OccupyingCells { get; }
+    public override BuildingType BuildingType { get; }
     
+    protected override ReadOnlyArray<IPlantGrowState> GrowStates { get; }
+    
+    public OakSapling(IBuildingsContainer buildingsContainer) : base(buildingsContainer)
+    {
+    }
 }

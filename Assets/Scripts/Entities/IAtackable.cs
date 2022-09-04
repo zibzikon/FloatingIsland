@@ -1,5 +1,5 @@
 
-public interface IAtackable : IUpdatable
+public interface IAtackable
 {
     public bool AttackingStarted { get; }
     

@@ -4,7 +4,7 @@ using Random = UnityEngine.Random;
 
 namespace Extentions
 {
-    public static class VectorExtentions
+    public static class VectorExtensions
     {
         public static Vector3Int SetDirection(this Vector3Int vector, Direction2 vectorDirection, Direction2 direction)
         {
@@ -74,6 +74,33 @@ namespace Extentions
         {
             return new Vector2Int((int)Mathf.Round(vector.x), (int)Mathf.Round(vector.y));
         }
+        
+        public static Vector2 IsometricToScreenPosition(this Vector3Int position)
+        {
+            var tileSize = GeneralGameSettings.Tilemap.TileSize;
+        
+            var tileX = position.x / tileSize.y;
+            var tileY = position.y / tileSize.y;
+        
+            var x = ((tileX - tileY) * tileSize.x / 2 + tileSize.x / 2) - tileSize.x / 2;
+            var y = ((tileX + tileY) * tileSize.y / 2) + position.z * (tileSize.y / 2);
+        
+            return new Vector2(x, y);
+        }
+
+        public static Vector3Int ScreenToIsometricPosition(this Vector2 position)
+        {
+            var tileSizeHalf = GeneralGameSettings.Tilemap.TileSize / 2;
+            var x = 0.5 * (position.x / tileSizeHalf.x + position.y / tileSizeHalf.y) / 100;
+            var y = 0.5 * (-position.x / tileSizeHalf.x + position.y / tileSizeHalf.y) / 100;
+            
+            var xGrid = (int)Math.Floor(x);
+            var yGrid =  (int)Math.Floor(y);
+            
+            var isometricPosition = new Vector3Int(xGrid, yGrid);
+            return isometricPosition;
+        }
+        
         
         public static Vector3Int RoundToVector3Int(this Vector3 vector)
         {

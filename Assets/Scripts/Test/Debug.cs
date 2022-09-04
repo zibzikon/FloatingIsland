@@ -5,17 +5,23 @@ namespace Test
 {
     public class Debug : MonoBehaviour
     {
-        [SerializeField] private IsometricTilemap2_5D _tilemap;
-        [SerializeField] private BuildingTile testBuildingTilePrefab;
+        private Timer _timer;
 
-        [SerializeField] private bool _spawnAndSetTile;
-        [SerializeField] private Vector3Int _position;
+        [SerializeField] private bool _startTimer;
+        [SerializeField] private float time;
 
         private void Update()
         {
-            if (!_spawnAndSetTile) return;
-            _spawnAndSetTile = false;
-            _tilemap.SetTile(Instantiate(testBuildingTilePrefab), _position);
+            if (!_startTimer) return;
+            _startTimer = false;
+            _timer.Start(time);
+            _timer.TimeOut += OnTimeOut;
+        }
+
+        private void OnTimeOut()
+        {
+            UnityEngine.Debug.Log("time out");
+            _timer.TimeOut -= OnTimeOut;
         }
     }
 }

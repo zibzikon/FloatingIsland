@@ -9,21 +9,14 @@ using UnityEngine.AI;
 
 public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
 {
-    [SerializeField] private NavMeshAgent _agent;
-    
-    [SerializeField] private BuildingFactory _buildingFactory;
+    public int Health { get; private set; }
 
-    [SerializeField] private BuildingPointersFactory _buildingPointersFactory;
-
-    [SerializeField] private bool _build;
+    private BuildingFactory _buildingFactory = new BuildingFactory();
     
-    [SerializeField] private BuildingType _buildingType;
-    
-    protected override EntityStats Stats { get; }
-
     public DamagableType DamagableType => DamagableType.Entity;
     
     public TargetType TargetType => TargetType.Player;
+    public FloatingIslandTransform Transform { get; }
 
     public bool IsDestroyed { get; private set; }
 
@@ -38,18 +31,15 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     public event Action SelectableObjectDeselected;
 
     public Inventory Inventory { get; private set; }
-
-    private PlayerStats _playerStats;
     
-    public Transform Transform => transform;
-
     private int _radiusToCollectDroppedItems = 2;
+    
+    public Builder Builder { get; private set; }
     
     private PlayerInput _input;
 
     private readonly List<IUpdatable> _contentToUpdate = new();
 
-    private Builder _builder;
 
     private Item _selectedItem = new WoodenAxe();
 
@@ -64,43 +54,34 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     private bool _targetAttackingStarted;
 
     private Timer _timer;
-    
-    public void Initialize(GameField gameField)
+
+    public Player(GameField gameField, NavMeshAgent agent, BuildingFactory buildingFactory, BuildingPointersFactory buildingPointersFactory )
     {
         InitializePlayerStats();
-        _movingBehaviour = new TerrestrialEntityMovingBehaviour(_agent, 6);
+        _movingBehaviour = new TerrestrialEntityMovingBehaviour(agent, 6);
         _contentToUpdate.Add(_movingBehaviour);
         
         _input = new PlayerInput();
         
-
-        _timer = new Timer();
-        _contentToUpdate.Add(_timer);
-        
-        _buildingFactory.Initialize();
-        _builder = new Builder(new BuilderBehaviour(gameField, _buildingFactory, _buildingPointersFactory,
+        Builder = new Builder(new BuilderBehaviour(gameField, _buildingFactory, buildingPointersFactory,
             Camera.main), _input);
         
-        Inventory = new Inventory(_builder);
+        Inventory = new Inventory(Builder);
 
         _input.Enable();;
-        _builder.Register();
-        _contentToUpdate.Add(_builder);
+        Builder.Register();
+        _contentToUpdate.Add(Builder);
     }
-
 
     private void InitializePlayerStats()
     {
-        _playerStats = new PlayerStats
-        {
-            Health = 20000000
-        };
+        Health = 1000;
     }
     
     private void OnDisable()
     {
         _input.Disable();
-        _builder.UnRegister();
+        Builder.UnRegister();
     }
 
     public void OnUpdate()
@@ -111,13 +92,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
         {
             content.OnUpdate();
         }
-        
-        if (_build)
-        {
-            _build = false;
-            _builder.Build(_buildingType);
-        }
-        
+
         if (_movingBehaviour.IsMoving) PositionChanged?.Invoke();
 
         CollectDroppedItems();
@@ -138,9 +113,8 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
         {
             ResetSelectedObjects();
         }
-        else if (_timer.TimeIsOut && _movingBehaviour.TargetWasReached)
         {
-            _timer.Start(2);
+            // ToDo
             Debug.Log("TargetWasAttacked");
             _selectedItem.Damage(_selectedTarget);
         }
@@ -148,7 +122,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     
     public bool TryOpenInventory()
     {
-        if (_builder.IsBuilding || _builder.BuildingEndedOnThisFrame || Inventory.CurrentState == ItemsContainer.ContainerState.Opened)
+        if (Builder.IsBuilding || Builder.BuildingEndedOnThisFrame || Inventory.CurrentState == ItemsContainer.ContainerState.Opened)
             return false;
         
         Inventory.Open();
@@ -162,7 +136,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
 
     private void CollectDroppedItems()
     {
-        var colliders = Physics.OverlapSphere(transform.position, _radiusToCollectDroppedItems);
+        var colliders = Physics.OverlapSphere(Transform.Position, _radiusToCollectDroppedItems);
         
         foreach (var collision in colliders)
         {
@@ -179,7 +153,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
     public bool TrySelectSelectableObject()
     {
         ResetSelectedObjects();
-        if (_builder.IsBuilding) return false;
+        if (Builder.IsBuilding) return false;
 
         var selectedTransform = RayCast.TrySelectItem(Camera.main);
         if (selectedTransform == null) return false;
@@ -221,7 +195,7 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
 
     public bool TryMoveToHitGameFieldPoint()
     {
-        if (_builder.IsBuilding) return false;
+        if (Builder.IsBuilding) return false;
 
         var hit = RayCast.GetRaycastHitByMousePosition(Camera.main);
         var collider = hit.collider;
@@ -252,8 +226,8 @@ public sealed class Player : Entity, IUpdatable, ITarget, IPausable, IInteractor
 
     public void TakeDamage(int count)
     {
-        _playerStats.Health -= count;
-        if (_playerStats.Health > 0) return;
+        Health -= count;
+        if (Health > 0) return;
         Destroy();
     }
 

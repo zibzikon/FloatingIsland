@@ -36,14 +36,13 @@ public class EnemySpawner : ITargetContainer, IUpdatable
         _pathFinder = new PathFinder(gameField);
         _enemiesWavesContainer = enemiesWavesContainer;
         _player = player;
-        _contentToUpdate.Add(_timer);
     }
 
     public ITarget GetClosestTargetOnLayer(Vector3 startPosition, TargetType preferredTargetType)
     {
         if (preferredTargetType == TargetType.Player) return _player;
         
-        var startCell = _gameField.GetCellByPosition(GameField.ConvertWorldToGameFieldPosition(startPosition));
+        var startCell = _gameField.GetCellByPosition(_gameField.ConvertScreenToGameFieldPosition(startPosition));
 
         var reachableCells = new Stack<Cell>();
         reachableCells.Push(startCell);
@@ -80,10 +79,10 @@ public class EnemySpawner : ITargetContainer, IUpdatable
 
         var blockingTarget = closestCellWithTarget != null ? GetBlockingTarget(startCell.Position, 
             closestCellWithTarget.Position) :null;
-        var playerCell = _gameField.GetCellByPosition(GameField.ConvertWorldToGameFieldPosition(_player.Transform.position));
+        var playerCell = _gameField.GetCellByPosition(_gameField.ConvertScreenToGameFieldPosition(_player.Transform.Position));
         
-        return blockingTarget ?? ( closestCellWithTarget?.PlacedBuilding ?? _player.IsDestroyed ? null 
-            :( GetBlockingTarget(startCell.Position ,playerCell.Position) ?? _player ));
+        return blockingTarget ?? ( closestCellWithTarget?.PlacedBuilding is not null && _player.IsDestroyed ? null 
+            : GetBlockingTarget(startCell.Position ,playerCell.Position) ?? _player );
     }
 
     private ITarget GetBlockingTarget(Vector3Int startCellPosition,Vector3Int endCellPosition)
@@ -131,9 +130,8 @@ public class EnemySpawner : ITargetContainer, IUpdatable
         
         if (!_waveStarted)
         {
-            if (_timer.TimeIsOut)
             {
-                _timer.Start(GetRandomEnemiesWaveSpawningTime());
+                // todo
                 SpawnWave(_enemiesWavesContainer.GetRandomWaveByGeneralGameDifficulty());
             }
         }
@@ -164,10 +162,9 @@ public class EnemySpawner : ITargetContainer, IUpdatable
 
     private void OnWaveStarted()
     {
-        if (_timer.TimeIsOut && _enemyChunksWave.Any())
         {
+            //ToDo
             var enemyChunk = _enemyChunksWave.Dequeue();
-            _timer.Start(enemyChunk.SpawnDurationAfterLastChunkSpawning);
             SpawnEnemyChunk(enemyChunk);
         }
     }

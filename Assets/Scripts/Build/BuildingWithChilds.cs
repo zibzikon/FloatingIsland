@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Extentions;
 using Factories.BuildingFactories;
 using UnityEngine;
 
 public abstract class BuildingWithChilds : Building, IUpdatable, IBuildingContainer
-{
-    [SerializeField] protected BuildPoints _buildPoints;
+{ 
+    protected abstract BuildPoints _buildPoints { get; }
     
     private List<Building> _childBuildings = new();
 
-    public Vector3 WorldPosition => transform.position;
+    public Vector3 WorldPosition => Transform.Position;
 
+    protected BuildingWithChilds(IBuildingsContainer buildingsContainer) : base(buildingsContainer)
+    {
+    }
+    
     private void Awake()
     {
         _buildPoints.Initialize(this);
@@ -53,8 +58,8 @@ public abstract class BuildingWithChilds : Building, IUpdatable, IBuildingContai
         _childBuildings.Add(building);
 
         buildPoint.SetChild();
-        AddNeighbour(building, direction);
-        building.AddNeighbour(this, direction.GetOppositeDirection());
+        SetNeighbour(building, direction);
+        building.SetNeighbour(this, direction.GetOppositeDirection());
     }
 
 
@@ -78,5 +83,7 @@ public abstract class BuildingWithChilds : Building, IUpdatable, IBuildingContai
     public virtual void OnUpdate()
     {
     }
+
+
 }
 

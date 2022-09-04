@@ -19,7 +19,7 @@ public class Cell
         Position = position;
     }
 
-    public bool BuildingCanBeSettedOnCell(Building building) => Building.CanBeMergedWithBuildings(building, new []{_placedBuilding} );
+    public bool BuildingCanBeSettedOnCell(Building building) =>_placedBuilding == null || Building.CanBeMergedWithBuildings(building, new []{_placedBuilding} );
 
     public void SetBuilding(Building building)
     {

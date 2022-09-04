@@ -4,7 +4,7 @@ using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-sealed class Builder : IUpdatable, IBuilder
+public sealed class Builder : IUpdatable, IBuilder
 {
     private readonly BuilderBehaviour _builderBehaviour;
 
@@ -45,13 +45,19 @@ sealed class Builder : IUpdatable, IBuilder
 
     private void AcceptSettingBuilding(InputAction.CallbackContext context) =>
         _builderBehaviour.AcceptSettingBuilding();
+    
     private void DeclineSettingBuilding(InputAction.CallbackContext context) =>
         _builderBehaviour.DeclineSettingBuilding();
-    private void SetBuilding(InputAction.CallbackContext context) =>
-        _builderBehaviour.SetBuilding();
+    
+    private void SetBuilding(InputAction.CallbackContext context)
+    {
+        if (_builderBehaviour.IsBuilding)
+            _builderBehaviour.SetBuilding();
+    }
+    
     private void AddWall(InputAction.CallbackContext context) =>
         _builderBehaviour.SpawnBuilding(BuildingType.Wall);
-    
+
     private void AddTower(InputAction.CallbackContext context) =>
         _builderBehaviour.SpawnBuilding(BuildingType.Tower);
     

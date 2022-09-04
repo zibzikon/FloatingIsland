@@ -7,5 +7,5 @@ public interface ITarget : IDamagable
     public event Action PositionChanged;
     
     public TargetType TargetType { get; }
-    public Transform Transform { get; }
+    public FloatingIslandTransform Transform { get; }
 }

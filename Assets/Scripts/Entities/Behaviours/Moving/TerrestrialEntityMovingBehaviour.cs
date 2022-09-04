@@ -32,7 +32,7 @@ namespace Units.Behaviours
         private Vector3 GetMovingPosition(ITarget targetTransform)
         {
             const int maxDistance = 20;
-            NavMesh.SamplePosition(targetTransform.Transform.position, out var hit,
+            NavMesh.SamplePosition(targetTransform.Transform.Position, out var hit,
                 maxDistance, NavMesh.AllAreas);
 
             _destinationPosition = hit.position;

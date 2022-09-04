@@ -7,10 +7,6 @@ public class BuildingTile : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
 
-    [Space]
-    [SerializeField]
-    private Vector2 _tileSize;
-    
     [SerializeField] 
     private Vector2 _anchorPosition;
 
@@ -21,12 +17,11 @@ public class BuildingTile : MonoBehaviour
     
     private void OnValidate()
     {
-        if (_correctTile)
-        {
-            CorrectSpritePosition();
-            CorrectTileSize();
-            _correctTile = false;
-        }
+        if (!_correctTile) return;
+        
+        CorrectSpritePivotPosition();
+        CorrectTileSize();
+        _correctTile = false;
     }
 
     public void SetTileDepth(int depth)
@@ -34,14 +29,18 @@ public class BuildingTile : MonoBehaviour
         _spriteRenderer.sortingOrder = depth;
     }
 
-    private void CorrectSpritePosition()
+    private void CorrectSpritePivotPosition()
     {
         var path = AssetDatabase.GetAssetPath(_spriteRenderer.sprite.texture);
         var textureImporter = (TextureImporter)AssetImporter.GetAtPath(path);
-        textureImporter.spritePivot = _anchorPosition;
         var texSettings = new TextureImporterSettings();
+        
+        textureImporter.spritePivot = _anchorPosition;
+        
         textureImporter.ReadTextureSettings(texSettings);
+        
         texSettings.spriteAlignment = (int)SpriteAlignment.Custom;
+        
         textureImporter.SetTextureSettings(texSettings);
         textureImporter.SaveAndReimport();
     }

@@ -9,39 +9,43 @@ public abstract class DefenceTower : Building
     public event Action<object> Atacking;
     
     public bool AttackingStarted { get; set; }
-
-    protected abstract TowerStats TowerStats { get; }
-    
-    public override int Weight { get; }
-
-    protected override BuildingStats BuildingStats => TowerStats;
     
     public override TargetType TargetType => TargetType.DefenceTower;
     
     protected override Direction2 Direction { get; set; } = Direction2.Foward;
 
     private ITarget _currentTarget;
+    
+    public abstract float AttackRadius { get; }
 
+    public abstract EnemyType PreferredEnemyType { get; }
+    
+    public abstract float AttackInterval { get; }
+
+    public abstract int AttackStrength { get; }
+    
     private float _attackInterval;
+    
+    protected DefenceTower(IBuildingsContainer buildingsContainer) : base(buildingsContainer)
+    {
+    }
+    
+    public abstract void Attack(ITarget target);
+
     public override bool ValidateSetSupportBuilding(IBuildingContainer supportBuilding)
     {
         return true;
     }
-
-    public override void Initialize()
-    {
-        base.Initialize();
-    }
-    
     
     private bool TryTrackNearestTarget()
     {
-        var position = transform.position;
+        var position = Transform.Position;
         ITarget nearestTarget = null; 
         ITarget nearestPreferredTarget = null; 
         var distance = Mathf.Infinity;
-        
-        foreach (var collider in Physics.OverlapSphere(transform.position, TowerStats.AttackRadius))
+        var colliders = new Collider[5];
+        Physics.OverlapSphereNonAlloc(Transform.Position, AttackRadius, colliders);
+        foreach (var collider in colliders)
         {
             var possibleTarget = collider.GetComponent<CollisionObject>();
             
@@ -49,13 +53,13 @@ public abstract class DefenceTower : Building
             var target = possibleTarget.Parent.GetComponent<IEnemyTarget>();
             if (target == null ) continue;
             
-            var distanceToTarget = Vector3.Distance(position, target.Transform.position);
+            var distanceToTarget = Vector3.Distance(position, target.Transform.Position);
             if (!(distance > distanceToTarget)) continue;
             
             distance = distanceToTarget;
             nearestTarget = target;
             
-            if (target.EnemyType == TowerStats.PreferredEnemyType)
+            if (target.EnemyType == PreferredEnemyType)
             {
                 nearestPreferredTarget = target;
             }
@@ -72,7 +76,7 @@ public abstract class DefenceTower : Building
         { 
             if (TryTrackNearestTarget())
             {
-                _attackInterval = TowerStats.AttackInterval;
+                _attackInterval = AttackInterval;
             }
         }
 
@@ -89,7 +93,7 @@ public abstract class DefenceTower : Building
             
             if (_attackInterval <= 0)
             {
-                _attackInterval = TowerStats.AttackInterval;
+                _attackInterval = AttackInterval;
                 Attack(_currentTarget);
                 Attacked?.Invoke();
                 Debug.Log("Target enemy is damaged");
@@ -105,7 +109,6 @@ public abstract class DefenceTower : Building
     protected virtual void UnsubscribeAllEvents()
     {
     }
-    
 
     private void ResetTarget()
     {
@@ -119,13 +122,10 @@ public abstract class DefenceTower : Building
     {
         if (_currentTarget == null || _currentTarget.IsDestroyed) return false;
 
-        var position = transform.position;
+        var position = Transform.Position;
 
-        var distanceToTarget = Vector3.Distance(position, _currentTarget.Transform.position);
+        var distanceToTarget = Vector3.Distance(position, _currentTarget.Transform.Position);
 
-        return distanceToTarget < TowerStats.AttackRadius;
+        return distanceToTarget < AttackRadius;
     }
-
-    public abstract void Attack(ITarget target);
-
 }
